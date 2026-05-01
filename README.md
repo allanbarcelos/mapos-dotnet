@@ -6,6 +6,32 @@ Sistema de gestão empresarial para pequenas e médias empresas — ordens de se
 >
 > Esta é uma **reimplementação totalmente remodelada em ASP.NET Core 9 (.NET)** — não uma portagem linha a linha. A arquitetura, a modelagem de dados, o sistema de permissões, o PDV e diversas funcionalidades foram redesenhados do zero com features próprias que não existem na versão original.
 
+Este sistema existe há **mais de 3 anos e está em produção ativa**. A decisão de disponibilizá-lo publicamente vem da vontade de contribuir com a comunidade open source — especialmente diante do surgimento crescente de projetos gerados por IA sem critério de segurança, sem testes em produção real e sem organização de código. Este projeto foi construído e validado ao longo de anos de uso real, com atenção a segurança, desempenho e manutenibilidade.
+
+---
+
+## 💛 Patrocinar o desenvolvimento
+
+Este projeto é mantido de forma independente, fora do horário comercial, com anos de trabalho investidos em segurança, arquitetura e funcionalidades reais em produção. Se ele é útil para você ou para a sua empresa, considere patrocinar o desenvolvimento contínuo.
+
+**[Patrocinar via GitHub Sponsors →](https://github.com/sponsors/allanbarcelos)**
+
+Seu apoio financia:
+- Novas funcionalidades e melhorias de segurança
+- Manutenção de dependências e compatibilidade com novas versões do .NET
+- Documentação e suporte à comunidade
+- Implementação de features votadas pelos patrocinadores
+
+---
+
+## Emissão de Nota Fiscal (NFC-e)
+
+A emissão de notas fiscais homologadas **não está incluída nesta versão pública**, mas existe e está em produção em versões dedicadas do sistema. A implementação é feita sob demanda, personalizada para a realidade tributária de cada cliente, e envolve homologação junto à SEFAZ, certificado digital e garantias sobre o correto funcionamento fiscal — portanto é um serviço com custo.
+
+Se você tem interesse, entre em contato: **allan@barcelos.dev**
+
+→ [Documentação técnica completa da implementação de NFC-e](NOTA_FISCAL.md)
+
 ---
 
 ## O que diferencia esta versão
@@ -100,13 +126,38 @@ Sistema de gestão empresarial para pequenas e médias empresas — ordens de se
 
 ---
 
+## Política de Senhas e PIN Fiscal
+
+### Senha de acesso
+
+| Regra | Comportamento |
+|-------|---------------|
+| **Primeiro acesso** | Troca obrigatória antes de acessar qualquer página do sistema |
+| **Complexidade mínima** | 8 caracteres, ao menos 1 letra maiúscula e 1 número |
+| **Alerta de expiração** | Banner visível após 45 dias sem alteração — não bloqueia, mas avisa |
+| **Armazenamento** | BCrypt com salt — nunca em texto plano |
+
+Ao criar um usuário, o administrador define uma senha temporária. No primeiro login, o sistema bloqueia a navegação e redireciona para a troca antes de liberar o acesso.
+
+### PIN do Fiscal PDV
+
+| Regra | Comportamento |
+|-------|---------------|
+| **Primeiro uso do cartão** | Troca de PIN obrigatória antes da autorização ser concluída |
+| **Expiração** | PIN com mais de **15 dias** exige renovação no próximo uso |
+| **Fluxo no PDV** | Ao detectar PIN expirado, um modal de troca é exibido na frente de caixa sem interromper a operação — após a troca, a autorização é concluída automaticamente |
+| **Armazenamento** | BCrypt com salt; código do cartão criptografado com AES |
+
+---
+
 ## Segurança
 
 - **Autenticação:** Cookie HttpOnly + SameSite=Lax, expiração deslizante
 - **Rate limiting no login:** bloqueio por IP e por e-mail após 5 tentativas (15 min)
 - **Permissões verificadas no banco** a cada requisição — nenhum dado sensível no cookie
 - **CSRF:** token em todos os formulários e requests AJAX
-- **Senhas:** BCrypt com salt
+- **Senhas:** BCrypt com salt; troca obrigatória no primeiro acesso; alerta após 45 dias
+- **PIN fiscal PDV:** BCrypt com salt; troca obrigatória no primeiro uso e a cada 15 dias
 - **Código fiscal PDV:** criptografado com AES (IDataProtectionProvider), nunca em texto plano
 - **Credenciais:** gerenciadas via Docker Secrets, nunca em variáveis de ambiente em texto puro
 - **Auditoria completa:** login, CRUD, operações PDV e autorizações fiscais registrados com IP e timestamp

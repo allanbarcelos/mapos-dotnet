@@ -3,7 +3,9 @@ using mapos_dotnet.Data;
 using mapos_dotnet.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace mapos_dotnet.Pages;
 
@@ -81,6 +83,29 @@ public abstract class PageModelBase : PageModel
     protected async Task AuditarAsync(string tarefa)
         => await AuditSvc.LogAsync(UsuarioNome, tarefa, Ip, UsuarioId);
 
+    // ── Política de senha — intercepta TODOS os requests ─────────────────────
+    public override async Task OnPageHandlerExecutionAsync(
+        PageHandlerExecutingContext context,
+        PageHandlerExecutionDelegate next)
+    {
+        // Redireciona para troca obrigatória se o claim estiver presente,
+        // exceto quando o próprio usuário já está em MinhaConta ou Account/Logout.
+        var deveTrocar = User.FindFirstValue("deve_trocar_senha") == "true";
+        if (deveTrocar)
+        {
+            var path = HttpContext.Request.Path.Value ?? "";
+            var isExempt = path.StartsWith("/MinhaConta", StringComparison.OrdinalIgnoreCase)
+                        || path.StartsWith("/Account",   StringComparison.OrdinalIgnoreCase);
+            if (!isExempt)
+            {
+                context.Result = RedirectToPage("/MinhaConta/Index");
+                return;
+            }
+        }
+
+        await next();
+    }
+
     protected async Task SetLayoutDataAsync()
     {
         var configs = await ConfigSvc.GetAllAsync();
@@ -88,5 +113,24 @@ public abstract class PageModelBase : PageModel
         ViewData["AppTheme"] = configs.GetValueOrDefault("app_theme", "white");
         var hora = DateTime.Now.Hour;
         ViewData["Saudacao"] = hora < 12 ? "Bom dia," : hora < 18 ? "Boa tarde," : "Boa noite,";
+
+        // Alerta de senha antiga (>45 dias) — não bloqueia, apenas avisa
+        if (UsuarioId > 0 && User.FindFirstValue("deve_trocar_senha") != "true")
+        {
+            var usuario = await Db.Usuarios.AsNoTracking()
+                .Where(u => u.Id == UsuarioId)
+                .Select(u => new { u.SenhaAlteradaEm })
+                .FirstOrDefaultAsync();
+
+            if (usuario is not null)
+            {
+                var idadeSenha = usuario.SenhaAlteradaEm.HasValue
+                    ? (DateTime.UtcNow - usuario.SenhaAlteradaEm.Value).TotalDays
+                    : double.MaxValue;
+
+                if (idadeSenha > 45)
+                    ViewData["AlerteSenhaIdade"] = (int)idadeSenha;
+            }
+        }
     }
 }

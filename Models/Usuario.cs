@@ -22,11 +22,17 @@ public class Usuario
     public DateOnly? DataExpiracao { get; set; }
     public string? UrlImageUser { get; set; }
 
+    // Política de senha
+    public bool       PrimeiroAcesso    { get; set; } = true;  // força troca na 1ª entrada
+    public DateTime?  SenhaAlteradaEm   { get; set; }          // UTC da última troca de senha
+
     // PDV — funções mutuamente exclusivas
     public bool    FiscalPdv       { get; set; }   // Fiscal: pode autorizar descontos/remoções
     public bool    OperadorCaixa   { get; set; }   // Operador de caixa: pode abrir/fechar caixa
     public string? FiscalPdvCodigo { get; set; }   // unique barcode value (fiscal only)
     public string? FiscalPdvPin    { get; set; }   // bcrypt hash (fiscal only)
+    public bool      PinPrimeiroUso  { get; set; } = true;  // força troca no 1º uso
+    public DateTime? PinAlteradoEm   { get; set; }          // UTC da última troca de PIN
 
     public Permissao Permissao { get; set; } = null!;
     public ICollection<Os> OsList { get; set; } = [];

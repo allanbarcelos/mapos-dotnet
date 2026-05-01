@@ -30,14 +30,12 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label asp-for="Input.ValorTotal" class="form-label">Valor Total <span class="text-red-500">*</span></label>
-                        <input asp-for="Input.ValorTotal" type="number" step="0.01" min="0.01" class="form-input"
-                               x-model="valorTotal" @@input="calcular()" />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input asp-for="Input.ValorTotal" type="number" step="0.01" min="0.01" class="form-input pl-9" x-model="valorTotal" @@input="calcular()" /></div>
                         <span asp-validation-for="Input.ValorTotal" class="form-error"></span>
                     </div>
                     <div>
                         <label asp-for="Input.Entrada" class="form-label">Entrada</label>
-                        <input asp-for="Input.Entrada" type="number" step="0.01" min="0" class="form-input"
-                               x-model="entrada" @@input="calcular()" />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input asp-for="Input.Entrada" type="number" step="0.01" min="0" class="form-input pl-9" x-model="entrada" @@input="calcular()" /></div>
                     </div>
                 </div>
 
@@ -67,7 +65,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label asp-for="Input.Desconto" class="form-label">Desconto</label>
-                        <input asp-for="Input.Desconto" type="number" step="0.01" class="form-input" />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input asp-for="Input.Desconto" type="text" data-money class="form-input pl-9" placeholder="0,00" /></div>
                     </div>
                     <div>
                         <label asp-for="Input.TipoDesconto" class="form-label">Tipo Desconto</label>

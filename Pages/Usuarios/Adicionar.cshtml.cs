@@ -112,23 +112,24 @@ public class AdicionarModel(
 
         var usuario = new Usuario
         {
-            Nome          = Input.Nome,
-            Email         = Input.Email,
-            Senha         = BCrypt.Net.BCrypt.HashPassword(Input.Senha),
-            Rg            = Input.Rg,
-            Cpf           = Input.Cpf,
-            Cep           = Input.Cep,
-            Rua           = Input.Rua,
-            Numero        = Input.Numero,
-            Bairro        = Input.Bairro,
-            Cidade        = Input.Cidade,
-            Estado        = Input.Estado,
-            Telefone      = Input.Telefone,
-            Celular       = Input.Celular,
-            PermissaoId   = Input.PermissaoId,
-            DataExpiracao = Input.DataExpiracao,
-            Situacao      = Input.Situacao,
-            DataCadastro  = DateOnly.FromDateTime(DateTime.Today),
+            Nome           = Input.Nome,
+            Email          = Input.Email,
+            Senha          = BCrypt.Net.BCrypt.HashPassword(Input.Senha),
+            Rg             = Input.Rg,
+            Cpf            = Input.Cpf,
+            Cep            = Input.Cep,
+            Rua            = Input.Rua,
+            Numero         = Input.Numero,
+            Bairro         = Input.Bairro,
+            Cidade         = Input.Cidade,
+            Estado         = Input.Estado,
+            Telefone       = Input.Telefone,
+            Celular        = Input.Celular,
+            PermissaoId    = Input.PermissaoId,
+            DataExpiracao  = Input.DataExpiracao,
+            Situacao       = Input.Situacao,
+            DataCadastro   = DateOnly.FromDateTime(DateTime.Today),
+            PrimeiroAcesso = true,   // força troca de senha no primeiro login
         };
 
         // PDV
@@ -146,6 +147,7 @@ public class AdicionarModel(
             var codigoGerado        = $"FISCAL{Guid.NewGuid():N}"[..20].ToUpperInvariant();
             usuario.FiscalPdvCodigo = fiscalProtector.Proteger(codigoGerado);
             usuario.FiscalPdvPin    = BCrypt.Net.BCrypt.HashPassword(Input.FiscalPdvPin);
+            usuario.PinPrimeiroUso  = true;  // força troca de PIN no primeiro uso
         }
 
         Db.Usuarios.Add(usuario);

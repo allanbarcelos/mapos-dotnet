@@ -89,6 +89,9 @@ public class LoginModel(
             new("sessao_tipo",             sessaoTipo),
         };
 
+        if (usuario.PrimeiroAcesso)
+            claims.Add(new Claim("deve_trocar_senha", "true"));
+
         var identity  = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 

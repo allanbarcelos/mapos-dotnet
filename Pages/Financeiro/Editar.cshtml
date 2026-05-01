@@ -14,11 +14,11 @@
         <div class="space-y-4">
             <div><label asp-for="Input.Descricao" class="form-label">Descrição</label><input asp-for="Input.Descricao" class="form-input" /></div>
             <div class="grid grid-cols-2 gap-4">
-                <div><label asp-for="Input.Valor" class="form-label">Valor</label><input asp-for="Input.Valor" type="number" step="0.01" class="form-input" /></div>
+                <div><label asp-for="Input.Valor" class="form-label">Valor</label><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input type="text" data-money asp-for="Input.Valor" class="form-input pl-9"  placeholder="0,00" /></div></div>
                 <div><label asp-for="Input.DataVencimento" class="form-label">Vencimento</label><input asp-for="Input.DataVencimento" type="date" class="form-input" /></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div><label asp-for="Input.Desconto" class="form-label">Desconto</label><input asp-for="Input.Desconto" type="number" step="0.01" class="form-input" /></div>
+                <div><label asp-for="Input.Desconto" class="form-label">Desconto</label><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input type="text" data-money asp-for="Input.Desconto" class="form-input pl-9"  placeholder="0,00" /></div></div>
                 <div><label asp-for="Input.TipoDesconto" class="form-label">Tipo</label><select asp-for="Input.TipoDesconto" class="form-select"><option value="real">Valor</option><option value="percent">%</option></select></div>
             </div>
             <div class="grid grid-cols-2 gap-4">

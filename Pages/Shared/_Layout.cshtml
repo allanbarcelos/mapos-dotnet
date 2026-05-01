@@ -154,6 +154,17 @@
             <!-- Page content -->
             <main class="flex-1 overflow-y-auto p-6">
                 @await Html.PartialAsync("_Alerts")
+                @if (ViewData["AlerteSenhaIdade"] is int diasSenha)
+                {
+                    <div x-data="{ show: true }" x-show="show"
+                         class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <div class="flex items-center gap-2">
+                            <i class='bx bx-time-five text-amber-500'></i>
+                            <span>Sua senha tem <strong>@diasSenha dias</strong> sem alteração. Recomendamos <a href="/MinhaConta" class="underline font-semibold">trocar agora</a> para manter sua conta segura.</span>
+                        </div>
+                        <button @@click="show = false" class="text-amber-400 hover:text-amber-600 ml-2"><i class='bx bx-x text-lg'></i></button>
+                    </div>
+                }
                 @RenderBody()
             </main>
         </div>
@@ -165,5 +176,6 @@ else
 }
 
 @await RenderSectionAsync("Scripts", required: false)
+<script src="~/js/currency-mask.js" asp-append-version="true"></script>
 </body>
 </html>

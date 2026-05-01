@@ -658,6 +658,39 @@
         </div>
     </template>
 
+    <!-- PIN change modal -->
+    <template x-if="pinModal.visivel">
+        <div class="fiscal-overlay">
+            <div class="fiscal-modal">
+                <div class="fiscal-icon"><i class='bx bx-key'></i></div>
+                <h2><i class='bx bx-refresh'></i>&nbsp;Troca de PIN Obrigatória</h2>
+                <p class="acao-desc" x-text="pinModal.motivo === 'primeiro_uso' ? 'Primeiro uso do cartão fiscal. Defina um novo PIN.' : 'PIN com mais de 15 dias. Defina um novo PIN para continuar.'"></p>
+
+                <label>Novo PIN</label>
+                <input type="password" x-model="pinModal.pinNovo"
+                       @@keydown.enter.prevent="$el.nextElementSibling.nextElementSibling.focus()"
+                       placeholder="Mínimo 4 dígitos" autocomplete="new-password" maxlength="10" />
+
+                <label>Confirmar novo PIN</label>
+                <input type="password" x-model="pinModal.pinNovo2"
+                       @@keydown.enter.prevent="confirmarAlteracaoPin()"
+                       placeholder="Repita o PIN" autocomplete="new-password" maxlength="10" />
+
+                <template x-if="pinModal.erro">
+                    <p class="erro-fiscal"><i class='bx bx-error-circle'></i> <span x-text="pinModal.erro"></span></p>
+                </template>
+
+                <button class="btn-confirmar-fiscal"
+                        @@click="confirmarAlteracaoPin()"
+                        :disabled="pinModal.loading || !pinModal.pinNovo || !pinModal.pinNovo2">
+                    <template x-if="pinModal.loading"><i class='bx bx-loader-alt bx-spin'></i></template>
+                    <span x-text="pinModal.loading ? 'Salvando...' : 'Salvar novo PIN'"></span>
+                </button>
+                <button class="btn-cancelar-fiscal" @@click="pinModal.visivel = false; acaoPendente = null">Cancelar</button>
+            </div>
+        </div>
+    </template>
+
     <!-- MP Point modal -->
     <template x-if="mpModal.visivel">
         <div class="mp-overlay">
@@ -771,6 +804,17 @@ function pdv(sessaoId) {
             pin: '',
             loading: false,
             erro: '',
+        },
+        pinModal: {
+            visivel: false,
+            fiscalId: 0,
+            codigo: '',
+            pinAtual: '',
+            pinNovo: '',
+            pinNovo2: '',
+            loading: false,
+            erro: '',
+            motivo: '',
         },
         acaoPendente: null,
         fiscalAutorizado: false,
@@ -1054,7 +1098,23 @@ function pdv(sessaoId) {
                     })
                 });
                 const data = await res.json();
-                if (!data.ok) { this.fiscalModal.erro = data.erro || 'Autorização negada.'; return; }
+                if (!data.ok) {
+                    if (data.pinExpirado) {
+                        // Abrir modal de troca obrigatória de PIN
+                        this.pinModal.fiscalId = data.fiscalId;
+                        this.pinModal.codigo   = this.fiscalModal.codigo;
+                        this.pinModal.pinAtual  = this.fiscalModal.pin;
+                        this.pinModal.pinNovo   = '';
+                        this.pinModal.pinNovo2  = '';
+                        this.pinModal.erro      = '';
+                        this.pinModal.motivo    = data.motivo;
+                        this.fiscalModal.visivel = false;
+                        this.pinModal.visivel    = true;
+                        return;
+                    }
+                    this.fiscalModal.erro = data.erro || 'Autorização negada.';
+                    return;
+                }
 
                 this.fiscalAutorizado = true;
                 this.fiscalNome = data.fiscal;
@@ -1080,6 +1140,46 @@ function pdv(sessaoId) {
                 this.editandoPrecoIdx = -1;
             }
             // 'desconto': discount value stays as typed — no extra action needed
+        },
+
+        async confirmarAlteracaoPin() {
+            if (!this.pinModal.pinNovo || !this.pinModal.pinNovo2) {
+                this.pinModal.erro = 'Preencha o novo PIN e a confirmação.'; return;
+            }
+            if (this.pinModal.pinNovo !== this.pinModal.pinNovo2) {
+                this.pinModal.erro = 'Os PINs não conferem.'; return;
+            }
+            if (this.pinModal.pinNovo.length < 4) {
+                this.pinModal.erro = 'O PIN deve ter ao menos 4 dígitos.'; return;
+            }
+            this.pinModal.loading = true;
+            this.pinModal.erro    = '';
+            try {
+                const res = await fetch('/Pdv/Index?handler=AlterarPinFiscal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.csrfToken() },
+                    body: JSON.stringify({
+                        fiscalId: this.pinModal.fiscalId,
+                        codigo:   this.pinModal.codigo,
+                        pinAtual: this.pinModal.pinAtual,
+                        pinNovo:  this.pinModal.pinNovo,
+                    })
+                });
+                const data = await res.json();
+                if (!data.ok) { this.pinModal.erro = data.erro || 'Erro ao alterar PIN.'; return; }
+
+                // PIN alterado — reabrir modal de autorização para concluir
+                this.pinModal.visivel    = false;
+                this.fiscalModal.visivel = true;
+                this.fiscalModal.codigo  = this.pinModal.codigo;
+                this.fiscalModal.pin     = this.pinModal.pinNovo;
+                this.fiscalModal.erro    = '';
+                await this.confirmarFiscal();
+            } catch (e) {
+                this.pinModal.erro = 'Erro de comunicação.';
+            } finally {
+                this.pinModal.loading = false;
+            }
         },
 
         fecharFiscalModal() {

@@ -79,8 +79,7 @@
                         <label asp-for="Input.SaldoInformado" class="form-label">
                             Dinheiro contado em caixa <span class="text-red-500">*</span>
                         </label>
-                        <input asp-for="Input.SaldoInformado" type="number" step="0.01" min="0"
-                               class="form-input text-2xl font-bold text-center" placeholder="0,00" autofocus />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500 text-xl pointer-events-none select-none">R$</span><input asp-for="Input.SaldoInformado" type="text" data-money class="form-input text-2xl font-bold text-center pl-12" placeholder="0,00" autofocus /></div>
                         <span asp-validation-for="Input.SaldoInformado" class="form-error"></span>
                     </div>
                     <div>

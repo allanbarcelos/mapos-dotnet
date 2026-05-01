@@ -20,7 +20,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label asp-for="Input.Valor" class="form-label">Valor <span class="text-red-500">*</span></label>
-                        <input asp-for="Input.Valor" type="number" step="0.01" class="form-input" />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input type="text" data-money asp-for="Input.Valor" class="form-input pl-9"  placeholder="0,00" /></div>
                     </div>
                     <div>
                         <label asp-for="Input.DataVencimento" class="form-label">Vencimento</label>
@@ -30,7 +30,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label asp-for="Input.Desconto" class="form-label">Desconto</label>
-                        <input asp-for="Input.Desconto" type="number" step="0.01" class="form-input" />
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 text-sm pointer-events-none select-none">R$</span><input type="text" data-money asp-for="Input.Desconto" class="form-input pl-9"  placeholder="0,00" /></div>
                     </div>
                     <div>
                         <label asp-for="Input.TipoDesconto" class="form-label">Tipo</label>

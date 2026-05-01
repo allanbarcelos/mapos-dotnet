@@ -328,8 +328,52 @@ public class IndexModel(
             !BCrypt.Net.BCrypt.Verify(req.Pin, usuario.FiscalPdvPin))
             return new JsonResult(new { ok = false, erro = "PIN incorreto." });
 
+        // Verificar expiração do PIN (primeiro uso ou > 15 dias)
+        var pinExpirado = usuario.PinPrimeiroUso
+            || !usuario.PinAlteradoEm.HasValue
+            || (DateTime.UtcNow - usuario.PinAlteradoEm.Value).TotalDays > 15;
+
+        if (pinExpirado)
+            return new JsonResult(new { ok = false, pinExpirado = true, fiscalId = usuario.Id,
+                motivo = usuario.PinPrimeiroUso ? "primeiro_uso" : "expirado" });
+
         await AuditarAsync($"PDV: Autorização fiscal por {usuario.Nome} (ação: {req.Acao})");
         return new JsonResult(new { ok = true, fiscal = usuario.Nome });
+    }
+
+    // ── POST: Alterar PIN fiscal ──────────────────────────────────────────────
+    public async Task<IActionResult> OnPostAlterarPinFiscalAsync([FromBody] AlterarPinFiscalRequest req)
+    {
+        if (!await TemPermissaoAsync("vPdv"))
+            return new JsonResult(new { ok = false, erro = "Sem permissão." });
+
+        if (req.FiscalId <= 0 || string.IsNullOrWhiteSpace(req.PinAtual) || string.IsNullOrWhiteSpace(req.PinNovo))
+            return new JsonResult(new { ok = false, erro = "Dados incompletos." });
+
+        if (req.PinNovo.Length < 4 || req.PinNovo.Length > 10)
+            return new JsonResult(new { ok = false, erro = "O novo PIN deve ter entre 4 e 10 dígitos." });
+
+        var usuario = await Db.Usuarios.FindAsync(req.FiscalId);
+        if (usuario is null || !usuario.FiscalPdv || !usuario.Situacao)
+            return new JsonResult(new { ok = false, erro = "Fiscal não encontrado." });
+
+        // Verificar código para confirmar identidade
+        if (!fiscalProtector.Verificar(req.Codigo, usuario.FiscalPdvCodigo ?? "")
+            && usuario.FiscalPdvCodigo != req.Codigo)
+            return new JsonResult(new { ok = false, erro = "Código do cartão não confere." });
+
+        // Verificar PIN atual
+        if (string.IsNullOrEmpty(usuario.FiscalPdvPin) ||
+            !BCrypt.Net.BCrypt.Verify(req.PinAtual, usuario.FiscalPdvPin))
+            return new JsonResult(new { ok = false, erro = "PIN atual incorreto." });
+
+        usuario.FiscalPdvPin   = BCrypt.Net.BCrypt.HashPassword(req.PinNovo);
+        usuario.PinAlteradoEm  = DateTime.UtcNow;
+        usuario.PinPrimeiroUso = false;
+        await Db.SaveChangesAsync();
+        await AuditarAsync($"PDV: Fiscal {usuario.Nome} alterou o PIN");
+
+        return new JsonResult(new { ok = true });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -379,4 +423,12 @@ public class AutorizarFiscalRequest
 public class RetomarRequest
 {
     public string Pin { get; set; } = string.Empty;
+}
+
+public class AlterarPinFiscalRequest
+{
+    public int    FiscalId { get; set; }
+    public string Codigo   { get; set; } = string.Empty;
+    public string PinAtual { get; set; } = string.Empty;
+    public string PinNovo  { get; set; } = string.Empty;
 }

@@ -2,6 +2,17 @@
 @model mapos_dotnet.Pages.MinhaConta.IndexModel
 @{ ViewData["Title"] = "Minha Conta"; }
 
+@if (Model.TrocaObrigatoria)
+{
+    <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <i class='bx bx-lock-alt text-xl text-red-500 mt-0.5'></i>
+        <div>
+            <p class="font-semibold">Troca de senha obrigatória</p>
+            <p class="text-red-700 mt-0.5">Este é o seu primeiro acesso ou sua senha foi redefinida pelo administrador. Defina uma nova senha para continuar.</p>
+        </div>
+    </div>
+}
+
 <h1 class="text-2xl font-bold text-gray-900 mb-6">Minha Conta</h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl">
