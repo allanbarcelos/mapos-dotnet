@@ -34,6 +34,14 @@ Se você tem interesse, entre em contato: **allan@barcelos.dev**
 
 ---
 
+## PDV em Tablets Android
+
+O sistema suporta operação via **tablets Android em modo kiosk** conectados ao servidor central. O tablet é um thin client — exibe o PDV em WebView fullscreen sem acesso ao Android subjacente. Nenhuma alteração no backend é necessária.
+
+→ [Documentação técnica do cliente Android (arquitetura, provisionamento, hardware)](PDV_ANDROID.md)
+
+---
+
 ## O que diferencia esta versão
 
 | Aspecto | Map-OS PHP original | Esta versão (.NET) |
