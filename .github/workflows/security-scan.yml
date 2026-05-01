@@ -20,12 +20,12 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore packages
-        run: dotnet restore dotnet-razor.csproj
+        run: dotnet restore mapos-dotnet.csproj
 
       - name: Scan for vulnerable packages
         id: scan
         run: |
-          OUTPUT=$(dotnet list dotnet-razor.csproj package --vulnerable --include-transitive 2>&1)
+          OUTPUT=$(dotnet list mapos-dotnet.csproj package --vulnerable --include-transitive 2>&1)
           echo "$OUTPUT"
           echo "output<<EOF" >> $GITHUB_OUTPUT
           echo "$OUTPUT"    >> $GITHUB_OUTPUT
