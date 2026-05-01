@@ -1,0 +1,61 @@
+@page
+@model mapos_dotnet.Pages.Mine.ComprasModel
+@{
+    ViewData["Title"] = "Compras";
+    var ptBR = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Minhas Compras</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Histórico de compras e pedidos</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Data</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-400">Nenhuma compra encontrada.</td>
+                    </tr>
+                }
+                @foreach (var v in Model.Items)
+                {
+                    <tr>
+                        <td class="text-gray-500 font-medium">#@v.Id</td>
+                        <td class="text-xs text-gray-500">@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                        <td class="text-sm font-medium">@v.ValorTotal.ToString("C", ptBR)</td>
+                        <td><span class="text-xs font-medium">@(v.Status ?? "—")</span></td>
+                        <td>
+                            <a href="/Mine/VisualizarCompra/@v.Id" class="btn-secondary btn-sm">
+                                <i class='bx bx-show mr-1'></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer flex justify-center gap-1">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <a href="?page=@i"
+                   class="px-3 py-1 text-sm rounded @(i == Model.Page ? "bg-primary-600 text-white" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50")">
+                    @i
+                </a>
+            }
+        </div>
+    }
+</div>

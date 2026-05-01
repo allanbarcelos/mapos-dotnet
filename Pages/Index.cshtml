@@ -1,0 +1,338 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var ptBR = new System.Globalization.CultureInfo("pt-BR");
+    var saldo = Model.ReceitaMes - Model.DespesaMes;
+    var totalFinanceiro = Model.ReceitaMes + Model.DespesaMes;
+    var receitaPct = totalFinanceiro > 0 ? (double)(Model.ReceitaMes / totalFinanceiro * 100) : 0;
+    var despesaPct = totalFinanceiro > 0 ? (double)(Model.DespesaMes / totalFinanceiro * 100) : 0;
+    var temAlgumCard = Model.PodeVerCliente || Model.PodeVerOs || Model.PodeVerLancamento || Model.PodeVerVenda;
+    var temBottomRow = Model.PodeVerOs || Model.PodeVerLancamento;
+}
+
+<!-- Page header -->
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Visão geral do sistema — @DateTime.Now.ToString("MMMM yyyy", ptBR)</p>
+</div>
+
+<!-- Stats cards -->
+@if (temAlgumCard)
+{
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+
+        @if (Model.PodeVerCliente)
+        {
+            <div class="card flex items-center gap-4 px-5 py-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class='bx bxs-group text-blue-600 text-2xl'></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Clientes</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-tight">@Model.TotalClientes</p>
+                    <p class="text-xs text-gray-400">cadastrados</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.PodeVerOs)
+        {
+            <div class="card flex items-center gap-4 px-5 py-4">
+                <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                    <i class='bx bxs-wrench text-yellow-600 text-2xl'></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">OS Abertas</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-tight">@Model.OsAbertas</p>
+                    <p class="text-xs text-gray-400">em andamento</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.PodeVerLancamento)
+        {
+            <div class="card flex items-center gap-4 px-5 py-4">
+                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <i class='bx bxs-file-blank text-red-500 text-2xl'></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Pendentes</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-tight">@Model.LancamentosPendentes</p>
+                    <p class="text-xs text-gray-400">lançamentos a baixar</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.PodeVerVenda)
+        {
+            <div class="card flex items-center gap-4 px-5 py-4">
+                <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <i class='bx bxs-cart text-green-600 text-2xl'></i>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Vendas do mês</p>
+                    <p class="text-2xl font-bold text-gray-900 leading-tight">@Model.VendasMes.ToString("C", ptBR)</p>
+                    <p class="text-xs text-gray-400">valor total</p>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+<!-- Main content row: Acesso Rápido + Resumo Financeiro -->
+<div class="grid grid-cols-1 @(Model.PodeVerLancamento ? "lg:grid-cols-3" : "") gap-6 mb-6">
+
+    <!-- Acesso Rápido -->
+    <div class="@(Model.PodeVerLancamento ? "lg:col-span-2" : "") card">
+        <div class="card-header">
+            <div class="flex items-center gap-2">
+                <i class='bx bx-grid-alt text-primary-600 text-lg'></i>
+                <h2 class="text-sm font-semibold text-gray-800">Acesso Rápido</h2>
+            </div>
+            <span class="text-xs text-gray-400">atalhos do sistema</span>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                @if (Model.PodeVerCliente)
+                {
+                    <a href="/Clientes"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-user-circle text-blue-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Clientes</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F1</span>
+                    </a>
+                }
+
+                @if (Model.PodeVerProduto)
+                {
+                    <a href="/Produtos"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-orange-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-package text-orange-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Produtos</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F2</span>
+                    </a>
+                }
+
+                @if (Model.PodeVerServico)
+                {
+                    <a href="/Servicos"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-cog text-purple-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Serviços</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F3</span>
+                    </a>
+                }
+
+                @if (Model.PodeVerOs)
+                {
+                    <a href="/Os"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-100 group-hover:bg-yellow-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-wrench text-yellow-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Ordens de Serviço</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F4</span>
+                    </a>
+                }
+
+                @if (Model.PodeVerVenda)
+                {
+                    <a href="/Vendas"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-green-100 group-hover:bg-green-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-cart-alt text-green-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Vendas</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F6</span>
+                    </a>
+                }
+
+                @if (Model.PodeVerLancamento)
+                {
+                    <a href="/Financeiro"
+                       class="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-primary-200 hover:bg-primary-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-teal-100 group-hover:bg-teal-200 flex items-center justify-center transition-colors">
+                            <i class='bx bxs-wallet text-teal-600 text-xl'></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-primary-700">Financeiro</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-mono">F7</span>
+                    </a>
+                }
+
+                @if (!Model.PodeVerCliente && !Model.PodeVerProduto && !Model.PodeVerServico &&
+                     !Model.PodeVerOs && !Model.PodeVerVenda && !Model.PodeVerLancamento)
+                {
+                    <div class="col-span-3 text-center py-8 text-gray-400 text-sm">
+                        <i class='bx bx-lock-alt text-3xl mb-2 block'></i>
+                        Nenhum acesso rápido disponível.
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo Financeiro -->
+    @if (Model.PodeVerLancamento)
+    {
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center gap-2">
+                    <i class='bx bx-bar-chart-alt-2 text-primary-600 text-lg'></i>
+                    <h2 class="text-sm font-semibold text-gray-800">Financeiro do Mês</h2>
+                </div>
+            </div>
+            <div class="card-body flex flex-col gap-5">
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
+                            <span class="text-xs font-medium text-gray-600">Receitas</span>
+                        </div>
+                        <span class="text-xs font-semibold text-green-700">@Model.ReceitaMes.ToString("C", ptBR)</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full transition-all"
+                             style="width: @receitaPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
+                            <span class="text-xs font-medium text-gray-600">Despesas</span>
+                        </div>
+                        <span class="text-xs font-semibold text-red-600">@Model.DespesaMes.ToString("C", ptBR)</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-red-500 h-2 rounded-full transition-all"
+                             style="width: @despesaPct.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100" />
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700">Saldo do mês</span>
+                    <span class="text-base font-bold @(saldo >= 0 ? "text-green-700" : "text-red-600")">
+                        @saldo.ToString("C", ptBR)
+                    </span>
+                </div>
+
+                <a href="/Financeiro" class="btn-secondary btn-sm w-full justify-center mt-1">
+                    <i class='bx bx-link-external'></i>
+                    Ver lançamentos
+                </a>
+
+            </div>
+        </div>
+    }
+
+</div>
+
+<!-- Bottom row: OS + Lançamentos -->
+@if (temBottomRow)
+{
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        @if (Model.PodeVerOs)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex items-center gap-2">
+                        <i class='bx bx-list-ul text-primary-600 text-lg'></i>
+                        <h2 class="text-sm font-semibold text-gray-800">Ordens de Serviço</h2>
+                    </div>
+                    <a href="/Os" class="text-xs text-primary-600 hover:underline">Ver todas</a>
+                </div>
+                <div class="card-body">
+                    <div class="flex flex-col items-center justify-center py-6 gap-3">
+                        <div class="w-14 h-14 rounded-full bg-yellow-50 flex items-center justify-center">
+                            <i class='bx bxs-wrench text-yellow-500 text-3xl'></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-gray-900">@Model.OsAbertas</p>
+                            <p class="text-sm text-gray-500 mt-0.5">ordens abertas</p>
+                        </div>
+                        @if (Model.OsAbertas > 0)
+                        {
+                            <span class="badge badge-yellow">Em andamento</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-green">Tudo em dia</span>
+                        }
+                        <a href="/Os?status=Aberto" class="btn-primary btn-sm mt-2">
+                            <i class='bx bx-search'></i>
+                            Ver abertas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.PodeVerLancamento)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex items-center gap-2">
+                        <i class='bx bx-receipt text-primary-600 text-lg'></i>
+                        <h2 class="text-sm font-semibold text-gray-800">Lançamentos Pendentes</h2>
+                    </div>
+                    <a href="/Financeiro" class="text-xs text-primary-600 hover:underline">Ver todos</a>
+                </div>
+                <div class="card-body">
+                    <div class="flex flex-col items-center justify-center py-6 gap-3">
+                        <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
+                            <i class='bx bxs-file-blank text-red-400 text-3xl'></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-gray-900">@Model.LancamentosPendentes</p>
+                            <p class="text-sm text-gray-500 mt-0.5">aguardando baixa</p>
+                        </div>
+                        @if (Model.LancamentosPendentes > 0)
+                        {
+                            <span class="badge badge-red">Pendente</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-green">Nenhum pendente</span>
+                        }
+                        <a href="/Financeiro?baixado=false" class="btn-primary btn-sm mt-2">
+                            <i class='bx bx-search'></i>
+                            Ver pendentes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+@section Scripts {
+<script>
+document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    switch (e.key) {
+        case 'F1': e.preventDefault(); @if (Model.PodeVerCliente)    { <text>window.location='/Clientes';</text>  } break;
+        case 'F2': e.preventDefault(); @if (Model.PodeVerProduto)    { <text>window.location='/Produtos';</text>  } break;
+        case 'F3': e.preventDefault(); @if (Model.PodeVerServico)    { <text>window.location='/Servicos';</text>  } break;
+        case 'F4': e.preventDefault(); @if (Model.PodeVerOs)         { <text>window.location='/Os';</text>        } break;
+        case 'F6': e.preventDefault(); @if (Model.PodeVerVenda)      { <text>window.location='/Vendas';</text>    } break;
+        case 'F7': e.preventDefault(); @if (Model.PodeVerLancamento) { <text>window.location='/Financeiro';</text>} break;
+    }
+});
+</script>
+}

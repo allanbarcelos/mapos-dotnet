@@ -1,0 +1,38 @@
+@page
+@model mapos_dotnet.Pages.Arquivos.IndexModel
+@{ ViewData["Title"] = "Arquivos"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Arquivos</h1>
+    <a href="/Arquivos/Adicionar" class="btn-primary btn-sm"><i class='bx bx-upload'></i> Upload</a>
+</div>
+
+<div class="card">
+    <table class="table-mapos">
+        <thead><tr><th>#</th><th>Nome</th><th>Descrição</th><th>Tipo</th><th>Tamanho</th><th>Data</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var d in Model.Documentos) {
+            <tr>
+                <td class="text-gray-400 text-xs">@d.Id</td>
+                <td class="font-medium text-sm">@d.Nome</td>
+                <td class="text-xs text-gray-500">@(d.Descricao ?? "-")</td>
+                <td class="text-xs">@(d.Tipo ?? "-")</td>
+                <td class="text-xs text-gray-500">@(d.Tamanho ?? "-")</td>
+                <td class="text-xs text-gray-500">@(d.Cadastro?.ToString("dd/MM/yyyy") ?? "-")</td>
+                <td>
+                    <div class="flex gap-1">
+                        @if (d.Url is not null) {
+                            <a href="@d.Url" target="_blank" class="btn-secondary btn-sm px-2"><i class='bx bx-download text-xs'></i></a>
+                        }
+                        <form method="post" asp-page-handler="Excluir" asp-route-id="@d.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-danger btn-sm px-2" onclick="return confirm('Excluir?')"><i class='bx bx-trash text-xs'></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (!Model.Documentos.Any()) { <tr><td colspan="7" class="text-center py-8 text-gray-400">Nenhum arquivo cadastrado</td></tr> }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,89 @@
+@page
+@model mapos_dotnet.Pages.Pdv.Terminais.IndexModel
+@{ ViewData["Title"] = "Terminais PDV"; }
+
+<div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+        <a href="/Pdv/Historico" class="text-gray-400 hover:text-gray-600">
+            <i class='bx bx-arrow-back text-xl'></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Terminais PDV</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Gerencie os pontos de venda disponíveis</p>
+        </div>
+    </div>
+    <a href="/Pdv/Terminais/Adicionar" class="btn-primary">
+        <i class='bx bx-plus'></i> Novo Terminal
+    </a>
+</div>
+
+@await Html.PartialAsync("_Alerts")
+
+<div class="card">
+    @if (!Model.Terminais.Any())
+    {
+        <div class="card-body text-center text-gray-400 py-12">
+            <i class='bx bx-store text-4xl mb-3'></i>
+            <p>Nenhum terminal cadastrado.</p>
+            <a href="/Pdv/Terminais/Adicionar" class="btn-primary mt-4 inline-flex">Cadastrar Terminal</a>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th>Status</th>
+                        <th>Sessão Atual</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Terminais)
+                    {
+                        <tr>
+                            <td class="font-mono text-xs text-gray-400">@t.Id</td>
+                            <td class="font-semibold">@t.Nome</td>
+                            <td class="text-gray-500 text-sm">@(t.Descricao ?? "—")</td>
+                            <td>
+                                @if (t.Status == "disponivel")
+                                { <span class="badge badge-success">Disponível</span> }
+                                else if (t.Status == "ocupado")
+                                { <span class="badge badge-warning">Ocupado</span> }
+                                else
+                                { <span class="badge badge-secondary">Pausado</span> }
+                            </td>
+                            <td class="text-sm text-gray-600">
+                                @if (t.SessaoCaixa?.Operador != null)
+                                { <span>@t.SessaoCaixa.Operador.Nome</span> }
+                                else
+                                { <span class="text-gray-400">—</span> }
+                            </td>
+                            <td class="text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="/Pdv/Terminais/Editar/@t.Id" class="btn-secondary text-xs py-1 px-2">
+                                        <i class='bx bx-edit'></i> Editar
+                                    </a>
+                                    @if (t.Status == "disponivel")
+                                    {
+                                        <form method="post" asp-page-handler="Excluir" asp-route-id="@t.Id"
+                                              onsubmit="return confirm('Excluir terminal \'@t.Nome\'?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-danger text-xs py-1 px-2">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,157 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Clientes.VisualizarModel
+@{
+    ViewData["Title"] = $"Cliente: {Model.Cliente.NomeCliente}";
+    var c = Model.Cliente;
+    var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+        <a href="/Clientes" class="text-gray-400 hover:text-gray-600"><i class='bx bx-arrow-back text-xl'></i></a>
+        <div>
+            <h1 class="text-2xl font-bold">@c.NomeCliente</h1>
+            <p class="text-sm text-gray-500">@(c.Fornecedor ? "Fornecedor" : "Cliente") · cadastrado em @(c.DataCadastro?.ToString("dd/MM/yyyy") ?? "-")</p>
+        </div>
+    </div>
+    <a href="/Clientes/Editar/@c.Id" class="btn-secondary btn-sm"><i class='bx bx-edit'></i> Editar</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Dados -->
+    <div class="space-y-4">
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Dados Pessoais</h3></div>
+            <div class="card-body text-sm space-y-2">
+                <div class="flex justify-between"><span class="text-gray-500">Tipo</span><span>@(c.PessoaFisica ? "Pessoa Física" : "Pessoa Jurídica")</span></div>
+                @if (c.Documento is not null)
+                { <div class="flex justify-between"><span class="text-gray-500">@(c.PessoaFisica ? "CPF" : "CNPJ")</span><span>@c.Documento</span></div> }
+                @if (c.Email is not null)
+                { <div class="flex justify-between"><span class="text-gray-500">E-mail</span><span>@c.Email</span></div> }
+                @if (c.Telefone is not null)
+                { <div class="flex justify-between"><span class="text-gray-500">Telefone</span><span>@c.Telefone</span></div> }
+                @if (c.Celular is not null)
+                { <div class="flex justify-between"><span class="text-gray-500">Celular</span><span>@c.Celular</span></div> }
+                @if (c.Contato is not null)
+                { <div class="flex justify-between"><span class="text-gray-500">Contato</span><span>@c.Contato</span></div> }
+            </div>
+        </div>
+        @if (c.Rua is not null)
+        {
+            <div class="card">
+                <div class="card-header"><h3 class="font-semibold">Endereço</h3></div>
+                <div class="card-body text-sm space-y-1">
+                    <p>@c.Rua@(c.Numero is not null ? $", {c.Numero}" : "")@(c.Complemento is not null ? $" - {c.Complemento}" : "")</p>
+                    @if (c.Bairro is not null) { <p class="text-gray-500">@c.Bairro</p> }
+                    <p class="text-gray-500">@(c.Cidade ?? "")@(c.Estado is not null ? $"/{c.Estado}" : "") @(c.Cep ?? "")</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Histórico -->
+    <div class="lg:col-span-2 space-y-4">
+
+        <!-- OS -->
+        <div class="card">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold">Ordens de Serviço (@c.OsList.Count)</h3>
+                <a href="/Os?q=@Uri.EscapeDataString(c.NomeCliente)" class="text-xs text-primary-600 hover:underline">ver todas</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Data</th><th>Status</th><th>Técnico</th><th class="text-right">Total</th></tr></thead>
+                    <tbody>
+                    @foreach (var os in c.OsList.Take(10))
+                    {
+                        <tr>
+                            <td><a href="/Os/Visualizar/@os.Id" class="text-primary-600 hover:underline">@os.Id</a></td>
+                            <td class="text-xs text-gray-500">@(os.DataInicial?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td><span class="badge-gray text-xs">@os.Status</span></td>
+                            <td class="text-xs">@os.Usuario.Nome</td>
+                            <td class="text-right text-sm font-medium">@os.ValorTotal.ToString("C", ptBR)</td>
+                        </tr>
+                    }
+                    @if (!c.OsList.Any()) { <tr><td colspan="5" class="text-center py-4 text-gray-400">Nenhuma OS</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Vendas -->
+        <div class="card">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold">Vendas (@c.Vendas.Count)</h3>
+                <a href="/Vendas?q=@Uri.EscapeDataString(c.NomeCliente)" class="text-xs text-primary-600 hover:underline">ver todas</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Data</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+                    <tbody>
+                    @foreach (var v in c.Vendas.Take(10))
+                    {
+                        <tr>
+                            <td><a href="/Vendas/Visualizar/@v.Id" class="text-primary-600 hover:underline">@v.Id</a></td>
+                            <td class="text-xs text-gray-500">@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                            <td><span class="badge-gray text-xs">@v.Status</span></td>
+                            <td class="text-right text-sm font-medium">@v.ValorTotal.ToString("C", ptBR)</td>
+                        </tr>
+                    }
+                    @if (!c.Vendas.Any()) { <tr><td colspan="4" class="text-center py-4 text-gray-400">Nenhuma venda</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Equipamentos -->
+        @if (c.Equipamentos.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h3 class="font-semibold">Equipamentos (@c.Equipamentos.Count)</h3></div>
+                <div class="overflow-x-auto">
+                    <table class="table-mapos">
+                        <thead><tr><th>Equipamento</th><th>Marca</th><th>Modelo</th><th>Nº Série</th></tr></thead>
+                        <tbody>
+                        @foreach (var eq in c.Equipamentos)
+                        {
+                            <tr>
+                                <td class="font-medium text-sm">@eq.Nome</td>
+                                <td class="text-xs text-gray-500">@(eq.Marca?.Nome ?? "-")</td>
+                                <td class="text-xs text-gray-500">@(eq.Modelo ?? "-")</td>
+                                <td class="text-xs font-mono text-gray-500">@(eq.NumSerie ?? "-")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Cobranças -->
+        @if (c.Cobrancas.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h3 class="font-semibold">Cobranças (@c.Cobrancas.Count)</h3></div>
+                <div class="overflow-x-auto">
+                    <table class="table-mapos">
+                        <thead><tr><th>#</th><th>Gateway</th><th>Vencimento</th><th>Valor</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var cb in c.Cobrancas.Take(10))
+                        {
+                            <tr>
+                                <td><a href="/Cobrancas/Visualizar/@cb.Id" class="text-primary-600 hover:underline">@cb.Id</a></td>
+                                <td class="text-xs">@(cb.PaymentGateway ?? "-")</td>
+                                <td class="text-xs">@cb.ExpireAt.ToString("dd/MM/yyyy")</td>
+                                <td class="text-sm font-medium">@(cb.Total.HasValue ? cb.Total.Value.ToString("N2") : "-")</td>
+                                <td><span class="badge-gray text-xs">@cb.Status</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

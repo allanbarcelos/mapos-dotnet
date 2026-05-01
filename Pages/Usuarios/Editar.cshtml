@@ -1,0 +1,257 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Usuarios.EditarModel
+@{
+    ViewData["Title"] = "Editar Usuário";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Usuarios" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Editar Usuário</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Atualize os dados do usuário</p>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Alerts")
+
+<div class="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 mb-6 text-sm text-blue-800">
+    <i class='bx bx-shield-quarter text-xl flex-shrink-0 mt-0.5'></i>
+    <div>
+        <p class="font-semibold mb-0.5">Atenção: Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)</p>
+        <p class="text-blue-700">Dados pessoais de colaboradores (CPF, RG, endereço) são dados pessoais protegidos pela LGPD. Cadastre apenas as informações necessárias para a relação de trabalho e operação do sistema. O colaborador tem direito de acessar, corrigir e solicitar exclusão dos seus dados a qualquer momento.</p>
+    </div>
+</div>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Input.Id" />
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Dados principais -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card">
+                <div class="card-header">Dados de Acesso</div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div class="md:col-span-2">
+                            <label asp-for="Input.Nome" class="form-label">Nome <span class="text-red-500">*</span></label>
+                            <input asp-for="Input.Nome" class="form-input" placeholder="Nome completo" />
+                            <span asp-validation-for="Input.Nome" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Email" class="form-label">E-mail <span class="text-red-500">*</span></label>
+                            <input asp-for="Input.Email" type="email" class="form-input" placeholder="email@exemplo.com" />
+                            <span asp-validation-for="Input.Email" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.NovaSenha" class="form-label">Nova Senha</label>
+                            <input asp-for="Input.NovaSenha" type="password" class="form-input"
+                                   placeholder="Deixe em branco para manter a atual" />
+                            <span asp-validation-for="Input.NovaSenha" class="form-error"></span>
+                            <p class="text-xs text-gray-400 mt-1">Mínimo 6 caracteres. Deixe em branco para não alterar.</p>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.PermissaoId" class="form-label">Permissão <span class="text-red-500">*</span></label>
+                            <select asp-for="Input.PermissaoId" class="form-select">
+                                <option value="">Selecione...</option>
+                                @foreach (var p in Model.Permissoes)
+                                {
+                                    <option value="@p.Id">@p.Nome</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.PermissaoId" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.DataExpiracao" class="form-label">Data de Expiração</label>
+                            <input asp-for="Input.DataExpiracao" type="date" class="form-input" />
+                            <span asp-validation-for="Input.DataExpiracao" class="form-error"></span>
+                        </div>
+
+                        <div class="md:col-span-2 flex items-center gap-2">
+                            <input asp-for="Input.Situacao" type="checkbox"
+                                   class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+                            <label asp-for="Input.Situacao" class="text-sm text-gray-700">Usuário ativo</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Dados Pessoais</div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div>
+                            <label asp-for="Input.Cpf" class="form-label">CPF</label>
+                            <input asp-for="Input.Cpf" class="form-input" placeholder="000.000.000-00" />
+                            <span asp-validation-for="Input.Cpf" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Rg" class="form-label">RG</label>
+                            <input asp-for="Input.Rg" class="form-input" placeholder="00.000.000-0" />
+                            <span asp-validation-for="Input.Rg" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Telefone" class="form-label">Telefone</label>
+                            <input asp-for="Input.Telefone" class="form-input" placeholder="(00) 0000-0000" />
+                            <span asp-validation-for="Input.Telefone" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Celular" class="form-label">Celular</label>
+                            <input asp-for="Input.Celular" class="form-input" placeholder="(00) 00000-0000" />
+                            <span asp-validation-for="Input.Celular" class="form-error"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Endereço</div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                        <div>
+                            <label asp-for="Input.Cep" class="form-label">CEP</label>
+                            <input asp-for="Input.Cep" class="form-input" placeholder="00000-000" />
+                            <span asp-validation-for="Input.Cep" class="form-error"></span>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label asp-for="Input.Rua" class="form-label">Rua</label>
+                            <input asp-for="Input.Rua" class="form-input" placeholder="Nome da rua" />
+                            <span asp-validation-for="Input.Rua" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Numero" class="form-label">Número</label>
+                            <input asp-for="Input.Numero" class="form-input" placeholder="Nº" />
+                            <span asp-validation-for="Input.Numero" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Bairro" class="form-label">Bairro</label>
+                            <input asp-for="Input.Bairro" class="form-input" placeholder="Bairro" />
+                            <span asp-validation-for="Input.Bairro" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Cidade" class="form-label">Cidade</label>
+                            <input asp-for="Input.Cidade" class="form-input" placeholder="Cidade" />
+                            <span asp-validation-for="Input.Cidade" class="form-error"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.Estado" class="form-label">Estado</label>
+                            <input asp-for="Input.Estado" class="form-input" placeholder="UF" maxlength="2" />
+                            <span asp-validation-for="Input.Estado" class="form-error"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar actions -->
+        <div class="space-y-4">
+            <div class="card">
+                <div class="card-body">
+                    <button type="submit" class="btn-primary w-full">
+                        <i class='bx bx-save'></i>
+                        Salvar Alterações
+                    </button>
+                    <a href="/Usuarios" class="btn-secondary w-full mt-2 flex items-center justify-center gap-1">
+                        <i class='bx bx-x'></i>
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header text-sm font-semibold text-gray-700">Perfil de Permissões</div>
+                <div class="card-body space-y-2">
+                    <p class="text-xs text-gray-500">
+                        Perfil atual: <strong class="text-gray-700">@(Model.Permissoes.FirstOrDefault(p => p.Id == Model.Input.PermissaoId)?.Nome ?? "—")</strong>
+                    </p>
+                    <a href="/Permissoes/Editar/@Model.Input.PermissaoId"
+                       class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-md border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors">
+                        <i class='bx bx-shield-quarter text-base'></i>
+                        Editar Permissões do Perfil
+                    </a>
+                </div>
+            </div>
+
+            <div class="card border border-amber-200" x-data="{ funcao: '@Model.Input.FuncaoPdv' }">
+                <div class="card-header bg-amber-50 text-amber-800 flex items-center gap-2">
+                    <i class='bx bx-store'></i>
+                    PDV
+                </div>
+                <div class="card-body space-y-3">
+                    <p class="text-xs text-gray-500 mb-1">Função do usuário no PDV:</p>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="Input.FuncaoPdv" value="nenhum"
+                               x-model="funcao"
+                               @(Model.Input.FuncaoPdv == "nenhum" ? "checked" : "")
+                               class="w-4 h-4 border-gray-300 text-gray-600 focus:ring-gray-400" />
+                        <span class="text-sm text-gray-700">Nenhuma</span>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="Input.FuncaoPdv" value="operador"
+                               x-model="funcao"
+                               class="w-4 h-4 border-gray-300 text-primary-600 focus:ring-primary-500" />
+                        <div>
+                            <span class="text-sm text-gray-700 font-medium">Operador de Caixa</span>
+                            <p class="text-xs text-gray-400">Pode abrir e fechar o caixa PDV</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="Input.FuncaoPdv" value="fiscal"
+                               x-model="funcao"
+                               class="w-4 h-4 border-gray-300 text-amber-600 focus:ring-amber-500" />
+                        <div>
+                            <span class="text-sm text-gray-700 font-medium">Fiscal</span>
+                            <p class="text-xs text-gray-400">Autoriza descontos, remoções e alterações de preço</p>
+                        </div>
+                    </label>
+
+                    <div x-show="funcao === 'fiscal'" x-cloak class="pt-2 border-t border-gray-100 space-y-3">
+                        <div>
+                            <label asp-for="Input.FiscalPdvPin" class="form-label">
+                                PIN <span class="text-gray-400 font-normal">(4–10 dígitos)</span>
+                            </label>
+                            <input asp-for="Input.FiscalPdvPin" type="password" class="form-input"
+                                   placeholder="Deixe em branco para manter o atual" autocomplete="new-password" />
+                            <span asp-validation-for="Input.FiscalPdvPin" class="form-error"></span>
+                            <p class="text-xs text-gray-400 mt-1">Deixe em branco para não alterar o PIN.</p>
+                        </div>
+
+                        @if (Model.TemCartaoFiscal)
+                        {
+                        <a href="/Usuarios/CartaoFiscal/@Model.Input.Id" target="_blank"
+                           class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-800 text-sm font-medium transition-colors">
+                            <i class='bx bx-id-card text-base'></i>
+                            Baixar / Imprimir Cartão Fiscal
+                        </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

@@ -1,0 +1,118 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Garantias.ImprimirModel
+@{
+    Layout = null;
+    var appName = ViewData["AppName"]?.ToString() ?? "Map-OS";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Termo de Garantia #@Model.Garantia.Id — @appName</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #1a1a1a; background: white; }
+        .page { max-width: 800px; margin: 0 auto; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1a1a1a; padding-bottom: 16px; margin-bottom: 20px; }
+        .company h1 { font-size: 20px; font-weight: bold; }
+        .company p { font-size: 11px; color: #444; margin-top: 2px; }
+        .doc-title { text-align: right; }
+        .doc-title h2 { font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .doc-title p { font-size: 11px; color: #666; margin-top: 4px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 10px; }
+        .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+        .meta-item label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .meta-item p { font-weight: bold; font-size: 13px; margin-top: 2px; }
+        .texto-garantia { font-size: 12px; line-height: 1.7; white-space: pre-wrap; padding: 16px; border: 1px solid #e5e7eb; border-radius: 4px; background: #fafafa; }
+        .signature { margin-top: 60px; display: flex; justify-content: space-around; }
+        .signature-line { text-align: center; width: 200px; }
+        .signature-line hr { border: none; border-top: 1px solid #1a1a1a; margin-bottom: 6px; }
+        .signature-line p { font-size: 10px; color: #555; }
+        .no-print { background: #1d4ed8; color: white; border: none; padding: 8px 20px; font-size: 13px; cursor: pointer; border-radius: 4px; margin-bottom: 20px; }
+        @@media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+            .page { padding: 15mm; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="no-print">
+            <button onclick="window.print()">&#128438; Imprimir</button>
+        </div>
+
+        <div class="header">
+            <div class="company">
+                @if (Model.Emitente is not null)
+                {
+                    <h1>@Model.Emitente.Nome</h1>
+                    @if (!string.IsNullOrWhiteSpace(Model.Emitente.Cnpj))
+                    {
+                        <p>CNPJ: @Model.Emitente.Cnpj</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Emitente.Telefone))
+                    {
+                        <p>Tel: @Model.Emitente.Telefone</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Emitente.Email))
+                    {
+                        <p>@Model.Emitente.Email</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Emitente.Cidade))
+                    {
+                        <p>@Model.Emitente.Cidade @(!string.IsNullOrWhiteSpace(Model.Emitente.Uf) ? "/ " + Model.Emitente.Uf : "")</p>
+                    }
+                }
+                else
+                {
+                    <h1>@appName</h1>
+                }
+            </div>
+            <div class="doc-title">
+                <h2>Termo de Garantia</h2>
+                <p>#@Model.Garantia.Id</p>
+                @if (Model.Garantia.DataGarantia.HasValue)
+                {
+                    <p>@Model.Garantia.DataGarantia.Value.ToString("dd/MM/yyyy")</p>
+                }
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <label>Referência</label>
+                    <p>@(Model.Garantia.RefGarantia ?? "—")</p>
+                </div>
+                <div class="meta-item">
+                    <label>Data</label>
+                    <p>@(Model.Garantia.DataGarantia?.ToString("dd/MM/yyyy") ?? "—")</p>
+                </div>
+                <div class="meta-item">
+                    <label>Responsável</label>
+                    <p>@(Model.Garantia.Usuario?.Nome ?? "—")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Texto da Garantia</div>
+            <div class="texto-garantia">@Model.Garantia.TextoGarantia</div>
+        </div>
+
+        <div class="signature">
+            <div class="signature-line">
+                <hr />
+                <p>Assinatura do Cliente</p>
+            </div>
+            <div class="signature-line">
+                <hr />
+                <p>Responsável Técnico</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

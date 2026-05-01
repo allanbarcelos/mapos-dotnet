@@ -1,0 +1,47 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Pdv.Terminais.EditarModel
+@{ ViewData["Title"] = "Editar Terminal PDV"; }
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Pdv/Terminais" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Editar Terminal PDV</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Atualize os dados do terminal</p>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Alerts")
+
+<div class="max-w-lg">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Input.Id" />
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="Input.Nome" class="form-label">Nome / Identificador <span class="text-red-500">*</span></label>
+                        <input asp-for="Input.Nome" class="form-input" />
+                        <span asp-validation-for="Input.Nome" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.Descricao" class="form-label">Descrição / Localização</label>
+                        <input asp-for="Input.Descricao" class="form-input" />
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn-primary">
+                        <i class='bx bx-save'></i> Salvar
+                    </button>
+                    <a href="/Pdv/Terminais" class="btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

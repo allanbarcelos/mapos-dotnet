@@ -1,0 +1,63 @@
+@page
+@model mapos_dotnet.Pages.Emitente.IndexModel
+@{ ViewData["Title"] = "Emitente"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Dados do Emitente</h1>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input asp-for="Input.Id" type="hidden" />
+
+            @if (Model.LogoUrl is not null) {
+                <div class="mb-4">
+                    <img src="@Model.LogoUrl" alt="Logo" class="h-16 object-contain" />
+                </div>
+            }
+
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Logo (imagem)</label>
+                    <input type="file" name="logo" accept="image/*" class="form-input" />
+                </div>
+                <div>
+                    <label asp-for="Input.Nome" class="form-label">Nome / Razão Social <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Nome" class="form-input" />
+                    <span asp-validation-for="Input.Nome" class="form-error"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label asp-for="Input.Cnpj" class="form-label">CNPJ</label><input asp-for="Input.Cnpj" class="form-input" /></div>
+                    <div><label asp-for="Input.Ie" class="form-label">Inscrição Estadual</label><input asp-for="Input.Ie" class="form-input" /></div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2"><label asp-for="Input.Rua" class="form-label">Rua</label><input asp-for="Input.Rua" class="form-input" /></div>
+                    <div><label asp-for="Input.Numero" class="form-label">Número</label><input asp-for="Input.Numero" class="form-input" /></div>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div><label asp-for="Input.Bairro" class="form-label">Bairro</label><input asp-for="Input.Bairro" class="form-input" /></div>
+                    <div><label asp-for="Input.Cidade" class="form-label">Cidade</label><input asp-for="Input.Cidade" class="form-input" /></div>
+                    <div>
+                        <label asp-for="Input.Uf" class="form-label">UF</label>
+                        <select asp-for="Input.Uf" class="form-select">
+                            <option value="">-</option>
+                            @foreach (var uf in new[]{"AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"})
+                            { <option>@uf</option> }
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label asp-for="Input.Cep" class="form-label">CEP</label><input asp-for="Input.Cep" class="form-input" /></div>
+                    <div><label asp-for="Input.Telefone" class="form-label">Telefone</label><input asp-for="Input.Telefone" class="form-input" /></div>
+                </div>
+                <div><label asp-for="Input.Email" class="form-label">E-mail</label><input asp-for="Input.Email" type="email" class="form-input" /></div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn-primary"><i class='bx bx-save'></i> Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>

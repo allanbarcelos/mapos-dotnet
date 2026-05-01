@@ -1,0 +1,207 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Cobrancas.VisualizarModel
+@{ ViewData["Title"] = $"Cobrança #{Model.Cobranca.Id}"; }
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <a href="/Cobrancas" class="text-sm text-gray-500 hover:text-gray-700"><i class='bx bx-arrow-back'></i> Cobranças</a>
+        <h1 class="text-2xl font-bold mt-1">Cobrança #@Model.Cobranca.Id</h1>
+    </div>
+    <div class="flex gap-2">
+        <form method="post" asp-page-handler="EnviarEmail" asp-route-id="@Model.Cobranca.Id">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-secondary btn-sm"><i class='bx bx-envelope'></i> Enviar E-mail</button>
+        </form>
+        <form method="post" asp-page-handler="Excluir" asp-route-id="@Model.Cobranca.Id">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-danger btn-sm" onclick="return confirm('Excluir esta cobrança?')">
+                <i class='bx bx-trash'></i> Excluir
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Dados principais -->
+    <div class="lg:col-span-2 space-y-6">
+
+        <!-- Informações da cobrança -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Dados da Cobrança</h3></div>
+            <div class="card-body">
+                <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                    <div>
+                        <dt class="text-gray-500">Gateway</dt>
+                        <dd class="font-medium">@(Model.Cobranca.PaymentGateway ?? "-")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Método de Pagamento</dt>
+                        <dd class="font-medium">@(Model.Cobranca.PaymentMethod ?? "-")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Valor</dt>
+                        <dd class="font-medium text-lg">@(Model.Cobranca.Total.HasValue ? Model.Cobranca.Total.Value.ToString("N2") : "-")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Vencimento</dt>
+                        <dd class="font-medium">@Model.Cobranca.ExpireAt.ToString("dd/MM/yyyy")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Status</dt>
+                        <dd>
+                            @{
+                                var badgeClass = Model.Cobranca.Status switch {
+                                    "RECEIVED" or "CONFIRMED" => "badge-green",
+                                    "OVERDUE"  or "failed"    => "badge-red",
+                                    "PENDING"  or "pending"   => "badge-yellow",
+                                    "CANCELLED" or "DELETED"  => "badge-gray",
+                                    _ => "badge-blue"
+                                };
+                            }
+                            <span class="@badgeClass">@Model.Cobranca.Status</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Criado em</dt>
+                        <dd class="font-medium">@(Model.Cobranca.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                    </div>
+                    @if (Model.Cobranca.ChargeId is not null)
+                    {
+                        <div class="col-span-2">
+                            <dt class="text-gray-500">ID externo (Gateway)</dt>
+                            <dd class="font-mono text-xs">@Model.Cobranca.ChargeId</dd>
+                        </div>
+                    }
+                    @if (Model.Cobranca.Message is not null)
+                    {
+                        <div class="col-span-2">
+                            <dt class="text-gray-500">Mensagem</dt>
+                            <dd>@Model.Cobranca.Message</dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Dados de pagamento -->
+        @if (Model.Cobranca.Barcode is not null || Model.Cobranca.Link is not null || Model.Cobranca.Pdf is not null)
+        {
+            <div class="card">
+                <div class="card-header"><h3 class="font-semibold">Dados de Pagamento</h3></div>
+                <div class="card-body space-y-3 text-sm">
+                    @if (Model.Cobranca.Barcode is not null)
+                    {
+                        <div>
+                            <p class="text-gray-500 mb-1">Código de Barras</p>
+                            <p class="font-mono text-xs bg-gray-50 rounded p-2 break-all">@Model.Cobranca.Barcode</p>
+                        </div>
+                    }
+                    @if (Model.Cobranca.Link is not null)
+                    {
+                        <div>
+                            <p class="text-gray-500 mb-1">Link de Pagamento</p>
+                            <a href="@Model.Cobranca.Link" target="_blank" class="text-primary-600 hover:underline break-all">@Model.Cobranca.Link</a>
+                        </div>
+                    }
+                    @if (Model.Cobranca.Pdf is not null)
+                    {
+                        <div>
+                            <a href="@Model.Cobranca.Pdf" target="_blank" class="btn-secondary btn-sm"><i class='bx bx-file-pdf'></i> Baixar Boleto PDF</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- Lateral -->
+    <div class="space-y-6">
+
+        <!-- Cliente -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Cliente</h3></div>
+            <div class="card-body text-sm space-y-2">
+                @if (Model.Cobranca.Cliente is not null)
+                {
+                    <p class="font-medium">@Model.Cobranca.Cliente.NomeCliente</p>
+                    @if (Model.Cobranca.Cliente.Documento is not null)
+                    { <p class="text-gray-500">@Model.Cobranca.Cliente.Documento</p> }
+                    @if (Model.Cobranca.Cliente.Telefone is not null)
+                    { <p class="text-gray-500">@Model.Cobranca.Cliente.Telefone</p> }
+                    @if (Model.Cobranca.Cliente.Email is not null)
+                    { <p class="text-gray-500">@Model.Cobranca.Cliente.Email</p> }
+                    <a href="/Clientes/Visualizar/@Model.Cobranca.ClienteId" class="text-primary-600 text-xs hover:underline">Ver cliente</a>
+                }
+                else { <p class="text-gray-400">Sem cliente vinculado</p> }
+            </div>
+        </div>
+
+        <!-- Referência -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Referência</h3></div>
+            <div class="card-body text-sm space-y-2">
+                @if (Model.Cobranca.OsId.HasValue)
+                {
+                    <p class="text-gray-500">Ordem de Serviço</p>
+                    <a href="/Os/Visualizar/@Model.Cobranca.OsId" class="text-primary-600 font-medium hover:underline">OS #@Model.Cobranca.OsId</a>
+                }
+                else if (Model.Cobranca.VendaId.HasValue)
+                {
+                    <p class="text-gray-500">Venda</p>
+                    <a href="/Vendas/Visualizar/@Model.Cobranca.VendaId" class="text-primary-600 font-medium hover:underline">Venda #@Model.Cobranca.VendaId</a>
+                }
+                else { <p class="text-gray-400">Sem referência</p> }
+            </div>
+        </div>
+
+        <!-- Atualizar status manualmente -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Atualizar Status</h3></div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="AtualizarStatus" asp-route-id="@Model.Cobranca.Id" class="flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <select name="status" class="form-select text-sm flex-1">
+                        @foreach (var s in new[] { "PENDING", "RECEIVED", "CONFIRMED", "OVERDUE", "REFUNDED", "RECEIVED_IN_CASH", "REFUND_REQUESTED", "CANCELLED", "DELETED" })
+                        {
+                            if (s == Model.Cobranca.Status) { <option value="@s" selected>@s</option> }
+                            else { <option value="@s">@s</option> }
+                        }
+                    </select>
+                    <button type="submit" class="btn-primary btn-sm">Salvar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ações do Gateway (MercadoPago) -->
+        @if (Model.Cobranca.PaymentGateway == "mercadopago" && Model.Cobranca.ChargeId is not null)
+        {
+            <div class="card">
+                <div class="card-header"><h3 class="font-semibold">Gateway MercadoPago</h3></div>
+                <div class="card-body space-y-2">
+                    <form method="post" asp-page-handler="AtualizarGateway" asp-route-id="@Model.Cobranca.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-secondary btn-sm w-full">
+                            <i class='bx bx-refresh'></i> Sincronizar status
+                        </button>
+                    </form>
+                    <form method="post" asp-page-handler="ConfirmarPagamento" asp-route-id="@Model.Cobranca.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-primary btn-sm w-full">
+                            <i class='bx bx-check-circle'></i> Confirmar pagamento
+                        </button>
+                    </form>
+                    <form method="post" asp-page-handler="CancelarGateway" asp-route-id="@Model.Cobranca.Id"
+                          onsubmit="return confirm('Cancelar esta cobrança no gateway?')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-danger btn-sm w-full">
+                            <i class='bx bx-x-circle'></i> Cancelar no gateway
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

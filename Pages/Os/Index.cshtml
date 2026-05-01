@@ -1,0 +1,162 @@
+@page
+@model mapos_dotnet.Pages.Os.IndexModel
+@{
+    ViewData["Title"] = "Ordens de Serviço";
+
+    string StatusBadge(string s) => s switch
+    {
+        "Aberto"       => "badge-blue",
+        "Faturado"     => "badge-green",
+        "Cancelado"    => "badge-red",
+        "Finalizado"   => "badge-gray",
+        "Em Andamento" => "badge-yellow",
+        _              => "badge-gray"
+    };
+}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Ordens de Serviço</h1>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Os/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova OS
+        </a>
+    }
+</div>
+
+<!-- Filtros -->
+<div class="card mb-6">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-[180px]">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="q" value="@Model.Q" placeholder="Cliente ou nº da OS"
+                       class="form-input" />
+            </div>
+            <div class="w-44">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    @foreach (var s in Model.StatusList)
+                    {
+                        <option value="@s" selected="@(Model.FiltroStatus == s ? "selected" : null)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="w-40">
+                <label class="form-label">De</label>
+                <input type="date" name="de" value="@Model.De" class="form-input" />
+            </div>
+            <div class="w-40">
+                <label class="form-label">Até</label>
+                <input type="date" name="ate" value="@Model.Ate" class="form-input" />
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-search mr-1'></i> Filtrar
+                </button>
+                <a href="/Os" class="btn-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.OsList.Count == 0)
+        {
+            <div class="p-8 text-center text-gray-500">
+                <i class='bx bx-clipboard text-4xl mb-2 block'></i>
+                Nenhuma OS encontrada.
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="table-mapos">
+                    <thead>
+                        <tr>
+                            <th>#OS</th>
+                            <th>Cliente</th>
+                            <th>Técnico</th>
+                            <th>Status</th>
+                            <th>Data Inicial</th>
+                            <th>Valor Total</th>
+                            <th>Faturado</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var os in Model.OsList)
+                        {
+                            <tr>
+                                <td class="font-semibold text-gray-900">#@os.Id</td>
+                                <td>@os.Cliente.NomeCliente</td>
+                                <td>@os.Usuario.Nome</td>
+                                <td>
+                                    <span class="@StatusBadge(os.Status)">@os.Status</span>
+                                </td>
+                                <td>@(os.DataInicial?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td>@os.ValorTotal.ToString("C")</td>
+                                <td>
+                                    @if (os.Faturado)
+                                    {
+                                        <span class="badge-green">Sim</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-gray">Não</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        <a href="/Os/Visualizar/@os.Id" class="btn-sm btn-secondary"
+                                           title="Visualizar">
+                                            <i class='bx bx-show'></i>
+                                        </a>
+                                        <a href="/Os/Editar/@os.Id" class="btn-sm btn-primary"
+                                           title="Editar">
+                                            <i class='bx bx-edit'></i>
+                                        </a>
+                                        @if (Model.PodeExcluir && !os.Faturado)
+                                        {
+                                            <form method="post" asp-page-handler="Excluir"
+                                                  onsubmit="return confirm('Excluir OS #@os.Id?')"
+                                                  class="inline">
+                                                <input type="hidden" name="id" value="@os.Id" />
+                                                <button type="submit" class="btn-sm btn-danger" title="Excluir">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <p class="text-sm text-gray-500">
+                        Página @Model.CurrentPage de @Model.TotalPages
+                    </p>
+                    <div class="flex gap-1">
+                        @for (var p = 1; p <= Model.TotalPages; p++)
+                        {
+                            var pg = p;
+                            <a href="?page=@pg&q=@Model.Q&status=@Model.FiltroStatus&de=@Model.De&ate=@Model.Ate"
+                               class="px-3 py-1 text-sm rounded-lg border @(pg == Model.CurrentPage ? "bg-primary-600 text-white border-primary-600" : "border-gray-200 text-gray-600 hover:bg-gray-50")">
+                                @pg
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

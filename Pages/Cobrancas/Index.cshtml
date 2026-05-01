@@ -1,0 +1,81 @@
+@page
+@model mapos_dotnet.Pages.Cobrancas.IndexModel
+@{ ViewData["Title"] = "Cobranças"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Cobranças</h1>
+</div>
+
+<div class="card">
+    <div class="overflow-x-auto">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Gateway</th>
+                    <th>Referência</th>
+                    <th>Cliente</th>
+                    <th>Vencimento</th>
+                    <th>Método</th>
+                    <th class="text-right">Valor</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var c in Model.Items)
+            {
+                <tr>
+                    <td class="text-gray-400 text-xs">@c.Id</td>
+                    <td class="text-xs">@(c.PaymentGateway ?? "-")</td>
+                    <td class="text-xs">
+                        @if (c.OsId.HasValue)   { <a href="/Os/Visualizar/@c.OsId"    class="text-primary-600 hover:underline">OS #@c.OsId</a> }
+                        else if (c.VendaId.HasValue) { <a href="/Vendas/Visualizar/@c.VendaId" class="text-primary-600 hover:underline">Venda #@c.VendaId</a> }
+                        else { <span>-</span> }
+                    </td>
+                    <td class="text-sm">@(c.Cliente?.NomeCliente ?? "-")</td>
+                    <td class="text-xs">@c.ExpireAt.ToString("dd/MM/yyyy")</td>
+                    <td class="text-xs">@(c.PaymentMethod ?? "-")</td>
+                    <td class="text-right font-medium text-sm">@(c.Total.HasValue ? c.Total.Value.ToString("N2") : "-")</td>
+                    <td>
+                        @{
+                            var badgeClass = c.Status switch {
+                                "RECEIVED" or "CONFIRMED" => "badge-green",
+                                "OVERDUE"  or "failed"    => "badge-red",
+                                "PENDING"  or "pending"   => "badge-yellow",
+                                "CANCELLED" or "DELETED"  => "badge-gray",
+                                _ => "badge-blue"
+                            };
+                        }
+                        <span class="@badgeClass">@c.Status</span>
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <a href="/Cobrancas/Visualizar/@c.Id" class="btn-secondary btn-sm px-2" title="Visualizar">
+                                <i class='bx bx-show text-xs'></i>
+                            </a>
+                            <form method="post" asp-page-handler="EnviarEmail" asp-route-id="@c.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-secondary btn-sm px-2" title="Enviar e-mail ao cliente">
+                                    <i class='bx bx-envelope text-xs'></i>
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="Excluir" asp-route-id="@c.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-danger btn-sm px-2" onclick="return confirm('Excluir esta cobrança?')" title="Excluir">
+                                    <i class='bx bx-trash text-xs'></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any())
+            {
+                <tr><td colspan="9" class="text-center py-8 text-gray-400">Nenhuma cobrança cadastrada</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, "/Cobrancas"))
+</div>

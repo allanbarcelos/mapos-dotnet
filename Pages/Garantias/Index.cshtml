@@ -1,0 +1,66 @@
+@page
+@model mapos_dotnet.Pages.Garantias.IndexModel
+@{
+    ViewData["Title"] = "Garantias";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Garantias</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Termos de garantia cadastrados</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Garantias/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova Garantia
+        </a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Referência</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Garantias.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-gray-400">Nenhuma garantia cadastrada.</td>
+                    </tr>
+                }
+                @foreach (var garantia in Model.Garantias)
+                {
+                    <tr>
+                        <td class="text-gray-500">@garantia.Id</td>
+                        <td class="font-medium">@(garantia.RefGarantia ?? "—")</td>
+                        <td>@(garantia.DataGarantia?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <a href="/Garantias/Visualizar/@garantia.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-show mr-1'></i> Visualizar
+                                </a>
+                                <a href="/Garantias/Editar/@garantia.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-edit-alt mr-1'></i> Editar
+                                </a>
+                                <form method="post" asp-page-handler="Excluir" asp-route-id="@garantia.Id"
+                                      onsubmit="return confirm('Deseja realmente excluir esta garantia?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class='bx bx-trash mr-1'></i> Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

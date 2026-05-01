@@ -1,0 +1,92 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.FinanceiroModel
+@{ ViewData["Title"] = "Relatório Financeiro"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório Financeiro</h1>
+    <a href="?handler=Exportar&tipo=@Model.Tipo&de=@Model.De&ate=@Model.Ate&pendentes=@Model.ApenasNaoBaixados" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    @foreach (var (v, l) in new[] { ("receita","Receitas"), ("despesa","Despesas") })
+                    {
+                        if (v == Model.Tipo) { <option value="@v" selected>@l</option> }
+                        else { <option value="@v">@l</option> }
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">De</label>
+                <input type="date" name="de" value="@Model.De" class="form-input" />
+            </div>
+            <div>
+                <label class="form-label">Até</label>
+                <input type="date" name="ate" value="@Model.Ate" class="form-input" />
+            </div>
+            <div class="flex items-center gap-2 pb-1">
+                <input type="checkbox" id="pendentes" name="pendentes" value="true" @(Model.ApenasNaoBaixados ? "checked" : "")
+                       class="w-4 h-4 rounded border-gray-300 text-primary-600" />
+                <label for="pendentes" class="text-sm">Somente não baixados</label>
+            </div>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Resumo -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Receitas</p>
+        <p class="text-2xl font-bold text-green-600">@Model.TotalReceitas.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Despesas</p>
+        <p class="text-2xl font-bold text-red-600">@Model.TotalDespesas.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Saldo</p>
+        <p class="text-2xl font-bold @(Model.Saldo >= 0 ? "text-green-600" : "text-red-600")">@Model.Saldo.ToString("C", ptBR)</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th><th>Descrição</th><th>Tipo</th><th>Categoria</th>
+                    <th>Vencimento</th><th>Pagamento</th><th>Baixado</th>
+                    <th class="text-right">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var l in Model.Items)
+            {
+                <tr>
+                    <td class="text-gray-400 text-xs">@l.Id</td>
+                    <td class="text-sm">@(l.Descricao ?? l.ClienteFornecedor ?? "-")</td>
+                    <td>
+                        <span class="@(l.Tipo == "receita" ? "badge-green" : "badge-red") text-xs">
+                            @(l.Tipo == "receita" ? "Receita" : "Despesa")
+                        </span>
+                    </td>
+                    <td class="text-xs text-gray-500">@(l.Categoria?.Nome ?? "-")</td>
+                    <td class="text-xs text-gray-500">@l.DataVencimento.ToString("dd/MM/yyyy")</td>
+                    <td class="text-xs text-gray-500">@(l.DataPagamento?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td class="text-center text-sm">@(l.Baixado ? "✓" : "-")</td>
+                    <td class="text-right font-medium text-sm @(l.Tipo == "receita" ? "text-green-700" : "text-red-700")">
+                        @l.ValorDesconto.ToString("C", ptBR)
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="8" class="text-center py-8 text-gray-400">Nenhum lançamento</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>

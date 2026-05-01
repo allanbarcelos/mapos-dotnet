@@ -1,0 +1,135 @@
+@inject mapos_dotnet.Services.IPermissaoService PermissaoSvc
+@{
+    var _uidClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int _uid = int.TryParse(_uidClaim, out var _u) ? _u : 0;
+    int permId = _uid > 0 ? await PermissaoSvc.GetPermissaoIdByUsuarioIdAsync(_uid) : 0;
+
+    async Task<bool> Tem(string atividade) =>
+        permId > 0 && await PermissaoSvc.TemPermissaoAsync(permId, atividade);
+
+    var page = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    string Active(string prefix) => page.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+
+<a href="/" class="sidebar-link @Active("/Index")">
+    <i class='bx bx-home-alt text-xl flex-shrink-0'></i>
+    <span x-show="sidebarOpen">Home</span>
+</a>
+
+@if (await Tem("vCliente"))
+{
+    <a href="/Clientes" class="sidebar-link @Active("/Clientes")">
+        <i class='bx bx-user text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Cliente / Fornecedor</span>
+    </a>
+}
+
+@if (await Tem("vProduto"))
+{
+    <a href="/Produtos" class="sidebar-link @Active("/Produtos")">
+        <i class='bx bx-basket text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Produtos</span>
+    </a>
+}
+
+@if (await Tem("vServico"))
+{
+    <a href="/Servicos" class="sidebar-link @Active("/Servicos")">
+        <i class='bx bx-wrench text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Serviços</span>
+    </a>
+}
+
+@if (await Tem("vVenda"))
+{
+    <a href="/Vendas" class="sidebar-link @Active("/Vendas")">
+        <i class='bx bx-cart-alt text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Vendas</span>
+    </a>
+}
+
+
+@if (await Tem("vOs"))
+{
+    <a href="/Os" class="sidebar-link @Active("/Os")">
+        <i class='bx bx-file text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Ordens de Serviço</span>
+    </a>
+}
+
+@if (await Tem("vGarantia"))
+{
+    <a href="/Garantias" class="sidebar-link @Active("/Garantias")">
+        <i class='bx bx-receipt text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Termos de Garantia</span>
+    </a>
+}
+
+@if (await Tem("vArquivo"))
+{
+    <a href="/Arquivos" class="sidebar-link @Active("/Arquivos")">
+        <i class='bx bx-box text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Arquivos</span>
+    </a>
+}
+
+@if (await Tem("vLancamento"))
+{
+    <a href="/Financeiro/Lancamentos" class="sidebar-link @Active("/Financeiro")">
+        <i class='bx bx-bar-chart-alt-2 text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Lançamentos</span>
+    </a>
+}
+
+@if (await Tem("vCobranca"))
+{
+    <a href="/Cobrancas" class="sidebar-link @Active("/Cobrancas")">
+        <i class='bx bx-dollar-circle text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Cobranças</span>
+    </a>
+}
+
+@if (await Tem("vCategoria"))
+{
+    <a href="/Categorias" class="sidebar-link @Active("/Categorias")">
+        <i class='bx bx-category text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Categorias</span>
+    </a>
+}
+
+@if (await Tem("vConta"))
+{
+    <a href="/Contas" class="sidebar-link @Active("/Contas")">
+        <i class='bx bx-credit-card text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Contas</span>
+    </a>
+}
+
+@if (await Tem("vMarca"))
+{
+    <a href="/Marcas" class="sidebar-link @Active("/Marcas")">
+        <i class='bx bx-purchase-tag text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Marcas</span>
+    </a>
+}
+
+@if (await Tem("vPdv"))
+{
+    <a href="/Pdv/Painel" class="sidebar-link @Active("/Pdv/Painel")">
+        <i class='bx bx-store text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">PDV</span>
+    </a>
+}
+
+@if (await Tem("cSistema"))
+{
+    <a href="/Pdv/Terminais" class="sidebar-link @Active("/Pdv/Terminais")">
+        <i class='bx bx-devices text-xl flex-shrink-0'></i>
+        <span x-show="sidebarOpen">Terminais PDV</span>
+    </a>
+}
+
+<a href="/Pesquisar" class="sidebar-link @Active("/Pesquisar")">
+    <i class='bx bx-search text-xl flex-shrink-0'></i>
+    <span x-show="sidebarOpen">Pesquisar</span>
+</a>

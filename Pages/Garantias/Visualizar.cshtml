@@ -1,0 +1,55 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Garantias.VisualizarModel
+@{
+    ViewData["Title"] = "Visualizar Garantia";
+}
+
+<div class="flex items-center justify-between mb-6 print:hidden">
+    <div class="flex items-center gap-3">
+        <a href="/Garantias" class="text-gray-400 hover:text-gray-600">
+            <i class='bx bx-arrow-back text-xl'></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Termo de Garantia</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Garantia #@Model.Garantia.Id</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="/Garantias/Editar/@Model.Garantia.Id" class="btn-secondary">
+            <i class='bx bx-edit-alt mr-1'></i> Editar
+        </a>
+        <a href="/Garantias/Imprimir/@Model.Garantia.Id" target="_blank" class="btn-primary">
+            <i class='bx bx-printer mr-1'></i> Imprimir
+        </a>
+    </div>
+</div>
+
+<div class="card max-w-3xl">
+    <div class="card-header">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide">Referência</p>
+                <p class="mt-1 font-semibold text-gray-900">@(Model.Garantia.RefGarantia ?? "—")</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide">Data</p>
+                <p class="mt-1 font-semibold text-gray-900">
+                    @(Model.Garantia.DataGarantia?.ToString("dd/MM/yyyy") ?? "—")
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-3">Texto da Garantia</p>
+        <div class="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap leading-relaxed">@Model.Garantia.TextoGarantia</div>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    @@media print {
+        body { background: white; }
+        .card { box-shadow: none; border: 1px solid #e5e7eb; }
+    }
+</style>
+}

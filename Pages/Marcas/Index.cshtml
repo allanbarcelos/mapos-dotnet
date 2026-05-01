@@ -1,0 +1,72 @@
+@page
+@model mapos_dotnet.Pages.Marcas.IndexModel
+@{
+    ViewData["Title"] = "Marcas";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Marcas</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Marcas de equipamentos</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Marcas/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova Marca
+        </a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Marcas.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-gray-400">Nenhuma marca cadastrada.</td>
+                    </tr>
+                }
+                @foreach (var marca in Model.Marcas)
+                {
+                    <tr>
+                        <td class="text-gray-500">@marca.Id</td>
+                        <td class="font-medium">@marca.Nome</td>
+                        <td>
+                            @if (marca.Situacao)
+                            {
+                                <span class="badge-green text-xs">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge-red text-xs">Inativo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <a href="/Marcas/Editar/@marca.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-edit-alt mr-1'></i> Editar
+                                </a>
+                                <form method="post" asp-page-handler="Excluir" asp-route-id="@marca.Id"
+                                      onsubmit="return confirm('Deseja realmente excluir a marca \'@marca.Nome\'?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class='bx bx-trash mr-1'></i> Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

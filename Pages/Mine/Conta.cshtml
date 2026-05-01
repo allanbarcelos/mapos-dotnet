@@ -1,0 +1,97 @@
+@page
+@model mapos_dotnet.Pages.Mine.ContaModel
+@{
+    ViewData["Title"] = "Minha Conta";
+    var c = Model.Cliente;
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Minha Conta</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Seus dados cadastrais</p>
+    </div>
+    <a href="/Mine/EditarDados" class="btn-primary">
+        <i class='bx bx-edit mr-1'></i> Editar Dados
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card">
+        <div class="card-header"><h2 class="font-semibold text-gray-800">Dados Pessoais</h2></div>
+        <div class="card-body text-sm space-y-3">
+            <div>
+                <p class="text-xs text-gray-500 uppercase">Nome</p>
+                <p class="font-medium mt-0.5">@c.NomeCliente</p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(c.Documento))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">CPF/CNPJ</p>
+                    <p class="mt-0.5">@c.Documento</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Email))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">E-mail</p>
+                    <p class="mt-0.5">@c.Email</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Telefone))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Telefone</p>
+                    <p class="mt-0.5">@c.Telefone</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Celular))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Celular</p>
+                    <p class="mt-0.5">@c.Celular</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h2 class="font-semibold text-gray-800">Endereço</h2></div>
+        <div class="card-body text-sm space-y-3">
+            @if (!string.IsNullOrWhiteSpace(c.Rua))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Logradouro</p>
+                    <p class="mt-0.5">@c.Rua@(!string.IsNullOrWhiteSpace(c.Numero) ? ", " + c.Numero : "")</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Complemento))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Complemento</p>
+                    <p class="mt-0.5">@c.Complemento</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Bairro))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Bairro</p>
+                    <p class="mt-0.5">@c.Bairro</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Cidade))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Cidade / Estado</p>
+                    <p class="mt-0.5">@c.Cidade@(!string.IsNullOrWhiteSpace(c.Estado) ? " / " + c.Estado : "")</p>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(c.Cep))
+            {
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">CEP</p>
+                    <p class="mt-0.5">@c.Cep</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

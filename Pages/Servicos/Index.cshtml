@@ -1,0 +1,65 @@
+@page
+@model mapos_dotnet.Pages.Servicos.IndexModel
+@{
+    ViewData["Title"] = "Serviços";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Serviços</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Gerencie os serviços disponíveis</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Servicos/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Novo Serviço
+        </a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Servicos.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-400">Nenhum serviço cadastrado.</td>
+                    </tr>
+                }
+                @foreach (var servico in Model.Servicos)
+                {
+                    <tr>
+                        <td class="text-gray-500">@servico.Id</td>
+                        <td class="font-medium">@servico.Nome</td>
+                        <td class="text-gray-600">@(servico.Descricao ?? "—")</td>
+                        <td>@servico.Preco.ToString("C")</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <a href="/Servicos/Editar/@servico.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-edit-alt mr-1'></i> Editar
+                                </a>
+                                <form method="post" asp-page-handler="Excluir" asp-route-id="@servico.Id"
+                                      onsubmit="return confirm('Deseja realmente excluir o serviço \'@servico.Nome\'?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class='bx bx-trash mr-1'></i> Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

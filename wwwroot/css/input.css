@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS custom properties por tema ─────────────────────────────────────────
+   Definidas no :root (white é o padrão) e sobrescritas por [data-theme].
+   As cores primary-50/100/600/700 são lidas pelo tailwind.config.js,
+   portanto mudar a variável aqui afeta todas as classes Tailwind primary-*.
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Primary — azul céu (padrão) */
+    --color-primary-50:  #f0f9ff;
+    --color-primary-100: #e0f2fe;
+    --color-primary-600: #0284c7;
+    --color-primary-700: #0369a1;
+
+    /* Estrutural */
+    --bg-page:     #f9fafb;
+    --bg-surface:  #ffffff;
+    --border:      #e5e7eb;
+    --text-base:   #111827;
+    --text-muted:  #6b7280;
+    --text-header: #374151;
+  }
+
+  /* ── Temas claros (só mudam o primary) ──────────────────────────────────── */
+
+  [data-theme="whitegreen"] {
+    --color-primary-50:  #f0fdf4;
+    --color-primary-100: #dcfce7;
+    --color-primary-600: #16a34a;
+    --color-primary-700: #15803d;
+  }
+
+  [data-theme="whiteblack"] {
+    --color-primary-50:  #f9fafb;
+    --color-primary-100: #f3f4f6;
+    --color-primary-600: #1f2937;
+    --color-primary-700: #111827;
+  }
+
+  /* ── Temas escuros (mudam estrutura + primary) ──────────────────────────── */
+
+  [data-theme="puredark"],
+  [data-theme="darkviolet"],
+  [data-theme="darkorange"] {
+    --bg-page:    #111827;
+    --bg-surface: #1f2937;
+    --border:     #374151;
+    --text-base:  #f9fafb;
+    --text-muted: #9ca3af;
+    --text-header: #e5e7eb;
+  }
+
+  [data-theme="puredark"] {
+    --color-primary-50:  #082f49;
+    --color-primary-100: #0c4a6e;
+    --color-primary-600: #0ea5e9;
+    --color-primary-700: #0284c7;
+  }
+
+  [data-theme="darkviolet"] {
+    --color-primary-50:  #2e1065;
+    --color-primary-100: #4c1d95;
+    --color-primary-600: #7c3aed;
+    --color-primary-700: #6d28d9;
+  }
+
+  [data-theme="darkorange"] {
+    --color-primary-50:  #431407;
+    --color-primary-100: #7c2d12;
+    --color-primary-600: #ea580c;
+    --color-primary-700: #c2410c;
+  }
+
+  /* ── Aplicação das variáveis estruturais ────────────────────────────────── */
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-base);
+  }
+
+  /* Sidebar e topbar */
+  [data-theme] aside,
+  [data-theme] header {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+  }
+
+  /* Textos do topo */
+  [data-theme] header p,
+  [data-theme] header span,
+  [data-theme] header button {
+    color: var(--text-header);
+  }
+
+  /* Scrollbar (dark themes) */
+  [data-theme="puredark"] ::-webkit-scrollbar-track,
+  [data-theme="darkviolet"] ::-webkit-scrollbar-track,
+  [data-theme="darkorange"] ::-webkit-scrollbar-track { background: #1f2937; }
+
+  [data-theme="puredark"] ::-webkit-scrollbar-thumb,
+  [data-theme="darkviolet"] ::-webkit-scrollbar-thumb,
+  [data-theme="darkorange"] ::-webkit-scrollbar-thumb { background: #374151; }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-600;
+  }
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-400;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+  .btn-success {
+    @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .form-input {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+    color: var(--text-base);
+    @apply block w-full rounded-lg border px-3 py-2 text-sm placeholder-gray-400 focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600;
+  }
+  .form-select {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+    color: var(--text-base);
+    @apply block w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600;
+  }
+  .form-label {
+    color: var(--text-header);
+    @apply block text-sm font-medium mb-1;
+  }
+  .form-error {
+    @apply mt-1 text-xs text-red-600;
+  }
+
+  .card {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+    @apply rounded-xl border shadow-sm;
+  }
+  .card-header {
+    border-color: var(--border);
+    @apply px-6 py-4 border-b flex items-center justify-between;
+  }
+  .card-header * {
+    color: var(--text-base);
+  }
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .table {
+    @apply w-full text-sm text-left;
+    color: var(--text-base);
+  }
+  .table thead tr {
+    background-color: var(--bg-page);
+    border-color: var(--border);
+    @apply border-b;
+  }
+  .table thead th {
+    color: var(--text-muted);
+    @apply px-4 py-3 font-semibold text-xs uppercase tracking-wider whitespace-nowrap;
+  }
+  .table tbody tr {
+    border-color: var(--border);
+    @apply border-b transition-colors last:border-b-0;
+  }
+  .table tbody tr:hover {
+    background-color: color-mix(in srgb, var(--bg-surface) 80%, var(--border));
+  }
+  .table tbody td {
+    @apply px-4 py-3 align-middle;
+  }
+  .table-mapos {
+    @apply table;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  /* Semantic names */
+  .badge-green,
+  .badge-success  { @apply badge bg-green-100 text-green-800; }
+  .badge-red,
+  .badge-danger   { @apply badge bg-red-100 text-red-800; }
+  .badge-yellow,
+  .badge-warning  { @apply badge bg-yellow-100 text-yellow-800; }
+  .badge-blue,
+  .badge-info,
+  .badge-primary  { @apply badge bg-blue-100 text-blue-800; }
+  .badge-gray,
+  .badge-secondary { @apply badge bg-gray-100 text-gray-700; }
+  .badge-purple   { @apply badge bg-purple-100 text-purple-800; }
+
+  .sidebar-link {
+    color: var(--text-muted);
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-50 hover:text-primary-700 transition-colors;
+  }
+  .sidebar-link.active {
+    @apply bg-primary-600 text-white hover:bg-primary-700 hover:text-white;
+  }
+  /* Quando a sidebar está colapsada, centraliza o ícone */
+  .sidebar-collapsed .sidebar-link {
+    @apply justify-center px-0;
+  }
+
+  .alert {
+    @apply flex items-start gap-3 p-4 rounded-lg border text-sm;
+  }
+  .alert-success { @apply alert bg-green-50 border-green-200 text-green-800; }
+  .alert-error   { @apply alert bg-red-50 border-red-200 text-red-800; }
+  .alert-warning { @apply alert bg-yellow-50 border-yellow-200 text-yellow-800; }
+  .alert-info    { @apply alert bg-blue-50 border-blue-200 text-blue-800; }
+}

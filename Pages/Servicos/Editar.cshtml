@@ -1,0 +1,50 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Servicos.EditarModel
+@{
+    ViewData["Title"] = "Editar Serviço";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Servicos" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Editar Serviço</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Serviço #@Model.Id</p>
+    </div>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Input.Nome" class="form-label">Nome <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Nome" class="form-input" placeholder="Nome do serviço" />
+                    <span asp-validation-for="Input.Nome" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Descricao" class="form-label">Descrição</label>
+                    <input asp-for="Input.Descricao" class="form-input" placeholder="Descrição do serviço (opcional)" />
+                    <span asp-validation-for="Input.Descricao" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Preco" class="form-label">Preço <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Preco" type="number" step="0.01" min="0" class="form-input" placeholder="0,00" />
+                    <span asp-validation-for="Input.Preco" class="form-error"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-8">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-save mr-1'></i> Salvar Alterações
+                </button>
+                <a href="/Servicos" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+@page
+@model mapos_dotnet.Pages.Auditoria.IndexModel
+@{ ViewData["Title"] = "Auditoria"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Auditoria</h1>
+    <form method="post" asp-page-handler="Limpar">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn-danger btn-sm" onclick="return confirm('Apagar todos os logs?')">
+            <i class='bx bx-trash'></i> Limpar Logs
+        </button>
+    </form>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="flex gap-3">
+        <input type="search" name="q" value="@Model.Q" class="form-input max-w-xs" placeholder="Pesquisar usuário ou tarefa..." />
+        <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+    </div>
+</form>
+
+<div class="card">
+    <table class="table-mapos">
+        <thead><tr><th>#</th><th>Usuário</th><th>Tarefa</th><th>Data</th><th>Hora</th><th>IP</th></tr></thead>
+        <tbody>
+        @foreach (var l in Model.Items) {
+            <tr>
+                <td class="text-gray-400 text-xs">@l.Id</td>
+                <td class="font-medium text-sm">@l.Usuario</td>
+                <td class="text-sm">@l.Tarefa</td>
+                <td class="text-xs text-gray-500">@l.Data.ToString("dd/MM/yyyy")</td>
+                <td class="text-xs text-gray-500">@l.Hora.ToString("HH:mm")</td>
+                <td class="text-xs text-gray-400">@(l.Ip ?? "-")</td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="6" class="text-center py-8 text-gray-400">Nenhum log encontrado</td></tr> }
+        </tbody>
+    </table>
+    @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, "/Auditoria"))
+</div>

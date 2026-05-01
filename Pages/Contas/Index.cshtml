@@ -1,0 +1,81 @@
+@page
+@model mapos_dotnet.Pages.Contas.IndexModel
+@{
+    ViewData["Title"] = "Contas";
+    var ptBR = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Contas</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Contas bancárias e caixas</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Contas/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova Conta
+        </a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Banco</th>
+                    <th>Agência/Nº</th>
+                    <th>Saldo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Contas.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-gray-400">Nenhuma conta cadastrada.</td>
+                    </tr>
+                }
+                @foreach (var conta in Model.Contas)
+                {
+                    <tr>
+                        <td class="text-gray-500">@conta.Id</td>
+                        <td class="font-medium">@conta.Nome</td>
+                        <td class="text-gray-600">@(conta.Banco ?? "—")</td>
+                        <td class="text-gray-600">@(conta.NumeroAgencia ?? "—")</td>
+                        <td class="font-medium @(conta.Saldo >= 0 ? "text-green-700" : "text-red-700")">
+                            @conta.Saldo.ToString("C", ptBR)
+                        </td>
+                        <td>
+                            @if (conta.Status)
+                            {
+                                <span class="badge-green text-xs">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge-red text-xs">Inativo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <a href="/Contas/Editar/@conta.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-edit-alt mr-1'></i> Editar
+                                </a>
+                                <form method="post" asp-page-handler="Excluir" asp-route-id="@conta.Id"
+                                      onsubmit="return confirm('Deseja realmente excluir a conta \'@conta.Nome\'?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class='bx bx-trash mr-1'></i> Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

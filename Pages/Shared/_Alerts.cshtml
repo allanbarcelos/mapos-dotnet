@@ -1,0 +1,35 @@
+@{
+    var success = TempData["Success"] as string;
+    var error   = TempData["Error"] as string;
+    var warning = TempData["Warning"] as string;
+    var info    = TempData["Info"] as string;
+}
+
+@if (success is not null)
+{
+    <div class="alert-success mb-4">
+        <i class='bx bx-check-circle text-xl'></i>
+        <span>@success</span>
+    </div>
+}
+@if (error is not null)
+{
+    <div class="alert-error mb-4">
+        <i class='bx bx-x-circle text-xl'></i>
+        <span>@error</span>
+    </div>
+}
+@if (warning is not null)
+{
+    <div class="alert-warning mb-4">
+        <i class='bx bx-error-circle text-xl'></i>
+        <span>@warning</span>
+    </div>
+}
+@if (info is not null)
+{
+    <div class="alert-info mb-4">
+        <i class='bx bx-info-circle text-xl'></i>
+        <span>@info</span>
+    </div>
+}

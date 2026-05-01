@@ -1,0 +1,105 @@
+@page
+@model mapos_dotnet.Pages.Mine.EditarDadosModel
+@{
+    ViewData["Title"] = "Editar Dados";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Mine/Conta" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Editar Dados</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Atualize suas informações pessoais</p>
+    </div>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Input.NomeCliente" class="form-label">Nome <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.NomeCliente" class="form-input" />
+                    <span asp-validation-for="Input.NomeCliente" class="form-error"></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.Telefone" class="form-label">Telefone</label>
+                        <input asp-for="Input.Telefone" class="form-input" placeholder="(00) 0000-0000" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Celular" class="form-label">Celular</label>
+                        <input asp-for="Input.Celular" class="form-input" placeholder="(00) 00000-0000" />
+                    </div>
+                </div>
+
+                <hr class="border-gray-200" />
+                <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Endereço</p>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <label asp-for="Input.Rua" class="form-label">Rua</label>
+                        <input asp-for="Input.Rua" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Numero" class="form-label">Número</label>
+                        <input asp-for="Input.Numero" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.Complemento" class="form-label">Complemento</label>
+                        <input asp-for="Input.Complemento" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Bairro" class="form-label">Bairro</label>
+                        <input asp-for="Input.Bairro" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-1">
+                        <label asp-for="Input.Cep" class="form-label">CEP</label>
+                        <input asp-for="Input.Cep" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Cidade" class="form-label">Cidade</label>
+                        <input asp-for="Input.Cidade" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Estado" class="form-label">Estado</label>
+                        <input asp-for="Input.Estado" class="form-input" placeholder="SP" maxlength="2" />
+                    </div>
+                </div>
+
+                <hr class="border-gray-200" />
+                <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Alterar Senha (opcional)</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.NovaSenha" class="form-label">Nova Senha</label>
+                        <input asp-for="Input.NovaSenha" type="password" class="form-input" placeholder="Deixe em branco para manter" />
+                        <span asp-validation-for="Input.NovaSenha" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.ConfirmarSenha" class="form-label">Confirmar Senha</label>
+                        <input asp-for="Input.ConfirmarSenha" type="password" class="form-input" />
+                        <span asp-validation-for="Input.ConfirmarSenha" class="form-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-8">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-save mr-1'></i> Salvar Alterações
+                </button>
+                <a href="/Mine/Conta" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

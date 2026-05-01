@@ -1,0 +1,169 @@
+@inject mapos_dotnet.Services.IPermissaoService PermissaoSvc
+@{
+    var _uidLayoutClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int _uidLayout = int.TryParse(_uidLayoutClaim, out var _ul) ? _ul : 0;
+    int _permId = _uidLayout > 0 ? await PermissaoSvc.GetPermissaoIdByUsuarioIdAsync(_uidLayout) : 0;
+    async Task<bool> TemPerm(string a) => _permId > 0 && await PermissaoSvc.TemPermissaoAsync(_permId, a);
+    var temConfiguracao = await TemPerm("cSistema") || await TemPerm("cUsuario") || await TemPerm("cPermissao")
+                       || await TemPerm("cAuditoria") || await TemPerm("cEmitente") || await TemPerm("cEmail");
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " - " : "")@(ViewData["AppName"] ?? "Map-OS")</title>
+    <link rel="shortcut icon" type="image/png" href="~/img/favicon.png" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="antialiased" data-theme="@(ViewData["AppTheme"] ?? "white")">
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="flex h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
+
+        <!-- Sidebar -->
+        <aside :class="sidebarOpen ? 'w-60' : 'w-16 sidebar-collapsed'"
+               class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 overflow-hidden">
+
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-200 h-16">
+                <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class='bx bx-wrench text-white text-lg'></i>
+                </div>
+                <span x-show="sidebarOpen" class="font-bold text-gray-900 text-lg truncate">@(ViewData["AppName"] ?? "Map-OS")</span>
+            </div>
+
+            <!-- Search -->
+            <div x-show="sidebarOpen" class="px-3 py-3 border-b border-gray-100">
+                <form action="/Pesquisar" method="get" class="relative">
+                    <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+                    <input type="search" name="termo" placeholder="Pesquisar..."
+                           class="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-400" />
+                </form>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
+                @await Html.PartialAsync("_SidebarLinks")
+            </nav>
+
+            <!-- Bottom: logout -->
+            <div class="px-2 py-3 border-t border-gray-100">
+                <a href="/Account/Logout"
+                   class="sidebar-link text-red-600 hover:bg-red-50 hover:text-red-700">
+                    <i class='bx bx-log-out-circle text-xl flex-shrink-0'></i>
+                    <span x-show="sidebarOpen">Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Top navbar -->
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+                <button @@click="sidebarOpen = !sidebarOpen"
+                        class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
+                    <i class='bx bx-menu text-xl'></i>
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <!-- Relatórios dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @@click="open = !open"
+                                class="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100">
+                            <i class='bx bx-pie-chart-alt-2'></i>
+                            <span>Relatórios</span>
+                            <i class='bx bx-chevron-down text-xs'></i>
+                        </button>
+                        <div x-show="open" @@click.outside="open = false"
+                             class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                            <a href="/Relatorios/Clientes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Clientes</a>
+                            <a href="/Relatorios/Produtos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Produtos</a>
+                            <a href="/Relatorios/Servicos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Serviços</a>
+                            <a href="/Relatorios/Os" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Ordens de Serviço</a>
+                            <a href="/Relatorios/Vendas" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Vendas</a>
+                            <a href="/Relatorios/Financeiro" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Financeiro</a>
+                            <a href="/Relatorios/Sku" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">SKU — Produtos Vendidos</a>
+                        </div>
+                    </div>
+
+                    @if (temConfiguracao)
+                    {
+                    <!-- Configurações dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @@click="open = !open"
+                                class="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100">
+                            <i class='bx bx-cog'></i>
+                            <span>Configurações</span>
+                            <i class='bx bx-chevron-down text-xs'></i>
+                        </button>
+                        <div x-show="open" @@click.outside="open = false"
+                             class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                            @if (await TemPerm("cSistema")) {
+                            <a href="/Configuracoes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sistema</a>
+                            }
+                            @if (await TemPerm("cUsuario")) {
+                            <a href="/Usuarios" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Usuários</a>
+                            }
+                            @if (await TemPerm("cEmitente")) {
+                            <a href="/Emitente" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Emitente</a>
+                            }
+                            @if (await TemPerm("cPermissao")) {
+                            <a href="/Permissoes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Permissões</a>
+                            }
+                            @if (await TemPerm("cAuditoria")) {
+                            <a href="/Auditoria" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Auditoria</a>
+                            }
+                            @if (await TemPerm("cEmail")) {
+                            <a href="/Emails" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Emails</a>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- User menu -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @@click="open = !open" class="flex items-center gap-2.5">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-xs text-gray-500">@ViewData["Saudacao"]</p>
+                                <p class="text-sm font-medium text-gray-800">@User.Identity?.Name</p>
+                            </div>
+                            <div class="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center">
+                                <i class='bx bx-user text-primary-600 text-xl'></i>
+                            </div>
+                        </button>
+                        <div x-show="open" @@click.outside="open = false"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
+                            <a href="/MinhaConta" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i class='bx bx-user mr-2'></i>Meu Perfil
+                            </a>
+                            <hr class="my-1 border-gray-100" />
+                            <a href="/Account/Logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <i class='bx bx-log-out-circle mr-2'></i>Sair
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                @await Html.PartialAsync("_Alerts")
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

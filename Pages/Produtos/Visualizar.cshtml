@@ -1,0 +1,94 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Produtos.VisualizarModel
+@{
+    ViewData["Title"] = $"Produto: {Model.Produto.Descricao}";
+    var p = Model.Produto;
+    var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+    var estoqueBaixo = p.Estoque <= p.EstoqueMinimo;
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+        <a href="/Produtos" class="text-gray-400 hover:text-gray-600"><i class='bx bx-arrow-back text-xl'></i></a>
+        <div>
+            <h1 class="text-2xl font-bold">@p.Descricao</h1>
+            @if (p.CodDeBarra is not null) { <p class="text-sm text-gray-500 font-mono">@p.CodDeBarra</p> }
+        </div>
+    </div>
+    <a href="/Produtos/Editar/@p.Id" class="btn-secondary btn-sm"><i class='bx bx-edit'></i> Editar</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <div class="space-y-4">
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Dados do Produto</h3></div>
+            <div class="card-body text-sm space-y-2">
+                <div class="flex justify-between"><span class="text-gray-500">Categoria</span><span>@(p.Categoria?.Nome ?? "-")</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Unidade</span><span>@(p.Unidade ?? "-")</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Preço Compra</span><span>@p.PrecoCompra.ToString("C", ptBR)</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Preço Venda</span><span class="font-semibold text-primary-600">@p.PrecoVenda.ToString("C", ptBR)</span></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Estoque</h3></div>
+            <div class="card-body text-sm space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Atual</span>
+                    <span class="@(estoqueBaixo ? "text-red-600 font-bold" : "font-semibold")">@p.Estoque @(estoqueBaixo ? "⚠" : "")</span>
+                </div>
+                <div class="flex justify-between"><span class="text-gray-500">Mínimo</span><span>@p.EstoqueMinimo</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Entradas</span><span>@p.Entrada</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Saídas</span><span>@p.Saida</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2 space-y-4">
+
+        <!-- Uso em OS -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Usado em OS (@Model.UsoOs.Count)</h3></div>
+            <div class="overflow-x-auto">
+                <table class="table-mapos">
+                    <thead><tr><th>OS</th><th>Cliente</th><th>Qtd</th><th class="text-right">Subtotal</th></tr></thead>
+                    <tbody>
+                    @foreach (var u in Model.UsoOs.Take(20))
+                    {
+                        <tr>
+                            <td><a href="/Os/Visualizar/@u.OsId" class="text-primary-600 hover:underline">OS #@u.OsId</a></td>
+                            <td class="text-sm">@u.Os.Cliente.NomeCliente</td>
+                            <td class="text-center">@u.Quantidade</td>
+                            <td class="text-right font-medium">@u.SubTotal.ToString("C", ptBR)</td>
+                        </tr>
+                    }
+                    @if (!Model.UsoOs.Any()) { <tr><td colspan="4" class="text-center py-4 text-gray-400">Nenhum uso em OS</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Uso em Vendas -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Vendido (@Model.UsoVenda.Count vezes)</h3></div>
+            <div class="overflow-x-auto">
+                <table class="table-mapos">
+                    <thead><tr><th>Venda</th><th>Cliente</th><th>Qtd</th><th class="text-right">Subtotal</th></tr></thead>
+                    <tbody>
+                    @foreach (var u in Model.UsoVenda.Take(20))
+                    {
+                        <tr>
+                            <td><a href="/Vendas/Visualizar/@u.VendaId" class="text-primary-600 hover:underline">Venda #@u.VendaId</a></td>
+                            <td class="text-sm">@u.Venda.Cliente.NomeCliente</td>
+                            <td class="text-center">@u.Quantidade</td>
+                            <td class="text-right font-medium">@u.SubTotal.ToString("C", ptBR)</td>
+                        </tr>
+                    }
+                    @if (!Model.UsoVenda.Any()) { <tr><td colspan="4" class="text-center py-4 text-gray-400">Nenhuma venda</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

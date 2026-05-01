@@ -1,0 +1,36 @@
+@page
+@model mapos_dotnet.Pages.Permissoes.IndexModel
+@{ ViewData["Title"] = "Permissões"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Permissões</h1>
+    <a href="/Permissoes/Adicionar" class="btn-primary btn-sm"><i class='bx bx-plus'></i> Nova Permissão</a>
+</div>
+
+<div class="card">
+    <table class="table-mapos">
+        <thead><tr><th>#</th><th>Nome</th><th>Situação</th><th>Data</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var p in Model.Items) {
+            <tr>
+                <td class="text-gray-400 text-xs">@p.Id</td>
+                <td class="font-medium">@p.Nome</td>
+                <td><span class="@(p.Situacao ? "badge-green" : "badge-red")">@(p.Situacao ? "Ativo" : "Inativo")</span></td>
+                <td class="text-xs text-gray-500">@(p.Data?.ToString("dd/MM/yyyy") ?? "-")</td>
+                <td>
+                    <div class="flex gap-1">
+                        <a href="/Permissoes/Editar/@p.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-edit text-xs'></i></a>
+                        <form method="post" asp-page-handler="Toggle" asp-route-id="@p.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="@(p.Situacao ? "btn-danger" : "btn-success") btn-sm px-2">
+                                <i class='bx @(p.Situacao ? "bx-x" : "bx-check") text-xs'></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="5" class="text-center py-8 text-gray-400">Nenhuma permissão cadastrada</td></tr> }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,44 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Permissoes.EditarModel
+@{ ViewData["Title"] = "Editar Permissão"; }
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Permissoes" class="text-gray-400 hover:text-gray-600"><i class='bx bx-arrow-back text-xl'></i></a>
+    <h1 class="text-2xl font-bold text-gray-900">Editar Permissão</h1>
+</div>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input asp-for="PermId" type="hidden" />
+    <div class="card max-w-3xl">
+        <div class="card-body">
+            <div class="mb-6">
+                <label asp-for="Nome" class="form-label">Nome <span class="text-red-500">*</span></label>
+                <input asp-for="Nome" class="form-input max-w-sm" />
+            </div>
+            <div class="space-y-4">
+                @foreach (var (label, keys) in mapos_dotnet.Pages.Permissoes.AdicionarModel.Modulos)
+                {
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="font-semibold text-sm text-gray-700 mb-3">@label</p>
+                        <div class="flex flex-wrap gap-x-6 gap-y-2">
+                            @foreach (var key in keys)
+                            {
+                                var checked_ = Model.PermissoesAtuais.TryGetValue(key, out var v) && v;
+                                var label2 = key[0] switch { 'v' => "Visualizar", 'a' => "Adicionar", 'e' => "Editar", 'd' => "Excluir", 'c' => key[1..], 'r' => "Relatório", _ => key };
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="checkbox" name="Perms[@key]" value="true" @(checked_ ? "checked" : "") class="h-4 w-4 text-primary-600 rounded" />
+                                    @label2
+                                </label>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-body border-t flex gap-3">
+            <button type="submit" class="btn-primary"><i class='bx bx-save'></i> Salvar</button>
+            <a href="/Permissoes" class="btn-secondary">Cancelar</a>
+        </div>
+    </div>
+</form>

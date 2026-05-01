@@ -1,0 +1,108 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.SkuModel
+@{ ViewData["Title"] = "Relatório SKU"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório SKU — Produtos Vendidos</h1>
+    <a href="?handler=Exportar&q=@Model.Q&de=@Model.De&ate=@Model.Ate&origem=@Model.Origem" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-40">
+                <label class="form-label">Buscar produto / cliente</label>
+                <input type="search" name="q" value="@Model.Q" class="form-input" placeholder="Descrição ou cliente..." />
+            </div>
+            <div>
+                <label class="form-label">Origem</label>
+                <select name="origem" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="venda" selected="@(Model.Origem == "venda")">Vendas</option>
+                    <option value="os" selected="@(Model.Origem == "os")">OS</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">De</label>
+                <input type="date" name="de" value="@Model.De" class="form-input" />
+            </div>
+            <div>
+                <label class="form-label">Até</label>
+                <input type="date" name="ate" value="@Model.Ate" class="form-input" />
+            </div>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-3 print:hidden">
+    <div class="card-body py-3 flex gap-8 text-sm">
+        <span>Registros: <strong>@Model.Items.Count</strong></span>
+        <span>Total: <strong class="text-primary-600">@Model.TotalGeral.ToString("C", ptBR)</strong></span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="overflow-x-auto">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="p-8 text-center text-gray-400">Nenhum resultado encontrado.</div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Origem</th>
+                        <th>#</th>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th class="text-right">Qtd</th>
+                        <th class="text-right">Preço Unit.</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                @if (r.Origem == "venda")
+                                {
+                                    <span class="badge badge-success">Venda</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-info">OS</span>
+                                }
+                            </td>
+                            <td class="font-mono text-xs">
+                                @if (r.Origem == "venda")
+                                {
+                                    <a href="/Vendas/Visualizar/@r.IdRelacionado" class="text-primary-600 hover:underline">#@r.IdRelacionado</a>
+                                }
+                                else
+                                {
+                                    <a href="/Os/Visualizar/@r.IdRelacionado" class="text-primary-600 hover:underline">#@r.IdRelacionado</a>
+                                }
+                            </td>
+                            <td>@r.DataOcorrencia.ToString("dd/MM/yyyy")</td>
+                            <td>@r.NomeCliente</td>
+                            <td>@r.Descricao</td>
+                            <td class="text-right">@r.Quantidade</td>
+                            <td class="text-right">@r.Preco.ToString("C", ptBR)</td>
+                            <td class="text-right font-semibold">@r.PrecoTotal.ToString("C", ptBR)</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="font-bold bg-gray-50">
+                        <td colspan="7" class="text-right">Total:</td>
+                        <td class="text-right text-primary-600">@Model.TotalGeral.ToString("C", ptBR)</td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+    </div>
+</div>

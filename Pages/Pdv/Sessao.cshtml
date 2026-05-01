@@ -1,0 +1,242 @@
+@page "/Pdv/Sessao/{id:int}"
+@model mapos_dotnet.Pages.Pdv.SessaoModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = $"Sessão #{Model.Sessao.Id}";
+}
+
+<div class="flex items-center gap-4 mb-6">
+    <a href="/Pdv/Historico" class="btn-secondary"><i class='bx bx-arrow-back'></i></a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Sessão #@Model.Sessao.Id</h1>
+        <p class="text-sm text-gray-500">
+            Operador: @Model.Sessao.Operador.Nome —
+            Aberto em @Model.Sessao.AbertoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+            @if (Model.Sessao.FechadoEm.HasValue)
+            {
+                <span>— Fechado em @Model.Sessao.FechadoEm.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+            }
+        </p>
+    </div>
+    <div class="ml-auto flex items-center gap-2">
+        @if (Model.Sessao.Status == "aberta")
+        {
+            <span class="badge badge-success">Aberta</span>
+            <a href="/Pdv/FecharCaixa/@Model.Sessao.Id" class="btn-danger ml-2">
+                <i class='bx bx-door-open'></i> Fechar Caixa
+            </a>
+        }
+        else
+        {
+            <span class="badge badge-secondary">Fechada</span>
+        }
+        <button type="button" id="btn-imprimir-extrato"
+                onclick="imprimirExtrato(@Model.Sessao.Id)"
+                class="btn-secondary flex items-center gap-1">
+            <i class='bx bx-printer'></i> Imprimir Extrato
+        </button>
+        <button type="button" id="btn-imprimir-relatorio"
+                onclick="imprimirRelatorio(@Model.Sessao.Id)"
+                class="btn-secondary flex items-center gap-1">
+            <i class='bx bx-file'></i> Relatório PDV
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Resumo financeiro -->
+    <div class="card lg:col-span-1">
+        <div class="card-header"><h3 class="font-semibold">Resumo</h3></div>
+        <div class="card-body space-y-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Vendas</span>
+                <span class="font-semibold">@Model.QtdVendas</span>
+            </div>
+            <div class="flex justify-between border-t pt-2">
+                <span class="text-gray-500">Saldo inicial</span>
+                <span>R$ @Model.Sessao.SaldoInicial.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Dinheiro</span>
+                <span>R$ @Model.TotalDinheiro.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">PIX</span>
+                <span>R$ @Model.TotalPix.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Débito</span>
+                <span>R$ @Model.TotalDebito.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Crédito</span>
+                <span>R$ @Model.TotalCredito.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Fiado</span>
+                <span>R$ @Model.TotalFiado.ToString("F2")</span>
+            </div>
+            <div class="flex justify-between border-t pt-2 font-bold text-base">
+                <span>Total</span>
+                <span class="text-green-700">R$ @Model.TotalVendas.ToString("F2")</span>
+            </div>
+            @if (Model.Sessao.Status == "fechada")
+            {
+                <div class="border-t pt-2 space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Saldo esperado</span>
+                        <span class="text-blue-700 font-medium">R$ @Model.Sessao.SaldoEsperado.ToString("F2")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Saldo informado</span>
+                        <span class="font-medium">R$ @Model.Sessao.SaldoInformado?.ToString("F2")</span>
+                    </div>
+                    @{
+                        var dif = Model.Sessao.Diferenca ?? 0;
+                        var difClass = dif < 0 ? "text-red-600" : dif > 0 ? "text-yellow-600" : "text-green-600";
+                        var difLabel = dif < 0 ? "Falta" : dif > 0 ? "Sobra" : "OK";
+                    }
+                    <div class="flex justify-between font-bold">
+                        <span class="text-gray-600">Diferença (@difLabel)</span>
+                        <span class="@difClass">R$ @Math.Abs(dif).ToString("F2")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Vendas da sessão -->
+    <div class="card lg:col-span-2">
+        <div class="card-header"><h3 class="font-semibold">Vendas (@Model.QtdVendas)</h3></div>
+        @if (Model.Sessao.Vendas.Count == 0)
+        {
+            <div class="card-body text-center text-gray-400 py-8">Nenhuma venda nesta sessão.</div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data</th>
+                            <th>Forma</th>
+                            <th class="text-right">Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var v in Model.Sessao.Vendas)
+                        {
+                            <tr>
+                                <td class="font-mono text-xs">@v.Id</td>
+                                <td>@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                                <td class="capitalize">@(v.FormaPagamento ?? "—")</td>
+                                <td class="text-right font-semibold">R$ @v.ValorTotal.ToString("F2")</td>
+                                <td>
+                                    <a href="/Vendas/Visualizar/@v.Id" class="text-primary-600 hover:underline text-xs">Ver</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Pausas da sessão -->
+@if (Model.Pausas.Any())
+{
+    <div class="card mt-6">
+        <div class="card-header"><h3 class="font-semibold">Pausas (@Model.Pausas.Count)</h3></div>
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Início</th>
+                        <th>Retomada</th>
+                        <th>Duração</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Pausas)
+                    {
+                        var duracao = p.RetomadaEm.HasValue
+                            ? (p.RetomadaEm.Value - p.IniciadaEm)
+                            : (DateTime.UtcNow - p.IniciadaEm);
+                        <tr>
+                            <td>@p.IniciadaEm.ToLocalTime().ToString("HH:mm:ss")</td>
+                            <td>@(p.RetomadaEm?.ToLocalTime().ToString("HH:mm:ss") ?? "Em andamento")</td>
+                            <td>@duracao.ToString(@"mm\:ss")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<form id="csrf-form">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+<script>
+async function imprimirRelatorio(sessaoId) {
+    const btn = document.getElementById('btn-imprimir-relatorio');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Imprimindo...";
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const res = await fetch(`/Pdv/Sessao/${sessaoId}?handler=ImprimirRelatorio`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+            btn.innerHTML = "<i class='bx bx-check'></i> Enviado!";
+            setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+        } else {
+            alert('Erro ao imprimir relatório:\n' + (data.erro || 'Erro desconhecido.'));
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert('Erro de comunicação.');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    }
+}
+
+async function imprimirExtrato(sessaoId) {
+    const btn = document.getElementById('btn-imprimir-extrato');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Imprimindo...";
+
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const res = await fetch(`/Pdv/Sessao/${sessaoId}?handler=ImprimirExtrato`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify({})
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            btn.innerHTML = "<i class='bx bx-check'></i> Enviado!";
+            setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 3000);
+        } else {
+            alert('Erro ao imprimir extrato:\n' + (data.erro || 'Erro desconhecido.'));
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert('Erro de comunicação com o servidor.');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    }
+}
+</script>
+}

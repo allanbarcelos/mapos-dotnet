@@ -1,0 +1,11 @@
+namespace mapos_dotnet.Models;
+
+public class Servico
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Descricao { get; set; }
+    public decimal Preco { get; set; }
+
+    public ICollection<ServicoOs> ServicosOs { get; set; } = [];
+}

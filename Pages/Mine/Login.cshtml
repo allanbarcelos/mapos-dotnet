@@ -1,0 +1,62 @@
+@page
+@model mapos_dotnet.Pages.Mine.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal do Cliente — Login</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+</head>
+<body class="antialiased bg-gray-50 min-h-screen flex items-center justify-center">
+
+<div class="w-full max-w-sm px-4">
+    <div class="text-center mb-8">
+        <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class='bx bx-user text-white text-3xl'></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Portal do Cliente</h1>
+        <p class="text-sm text-gray-500 mt-1">Acesse sua conta para acompanhar seus pedidos</p>
+    </div>
+
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="mb-4 flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            <i class='bx bx-error-circle'></i> @Model.ErrorMessage
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label asp-for="Input.Email" class="form-label">E-mail</label>
+                    <input asp-for="Input.Email" type="email" class="form-input" placeholder="seu@email.com" autofocus />
+                    <span asp-validation-for="Input.Email" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Senha" class="form-label">Senha</label>
+                    <input asp-for="Input.Senha" type="password" class="form-input" placeholder="••••••••" />
+                    <span asp-validation-for="Input.Senha" class="form-error"></span>
+                </div>
+
+                <button type="submit" class="btn-primary w-full justify-center">
+                    Entrar
+                </button>
+            </form>
+        </div>
+    </div>
+    <p class="text-center text-sm text-gray-500 mt-4">
+        Não tem conta? <a href="/Mine/Cadastrar" class="text-primary-600 hover:underline font-medium">Cadastre-se</a>
+    </p>
+</div>
+
+</body>
+</html>

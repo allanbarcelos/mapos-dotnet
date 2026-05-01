@@ -1,0 +1,1160 @@
+@page
+@model mapos_dotnet.Pages.Pdv.IndexModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR" style="height:100%">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDV — Frente de Caixa</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        html, body { height: 100%; overflow: hidden; background: #0f172a; }
+
+        /* Topbar */
+        #pdv-topbar {
+            height: 48px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        #pdv-topbar .logo {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: .5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #pdv-topbar .sep { color: #475569; }
+        #pdv-topbar .info {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        #pdv-topbar .clock {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e2e8f0;
+            font-variant-numeric: tabular-nums;
+            margin-left: auto;
+        }
+        #pdv-topbar .btn-fechar {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background .15s;
+        }
+        #pdv-topbar .btn-fechar:hover { background: #dc2626; }
+
+        /* Main layout */
+        #pdv-main {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            height: calc(100% - 48px);
+            gap: 0;
+        }
+
+        /* Left panel */
+        #pdv-left {
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+            border-right: 1px solid #1e293b;
+            overflow: hidden;
+        }
+        #pdv-search {
+            padding: 12px;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        #pdv-search input {
+            width: 100%;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 16px;
+            padding: 10px 14px 10px 42px;
+            outline: none;
+            transition: border-color .15s;
+        }
+        #pdv-search input:focus { border-color: #3b82f6; }
+        #pdv-search input::placeholder { color: #475569; }
+        #pdv-search .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 20px;
+            pointer-events: none;
+        }
+        #pdv-results {
+            flex: 1;
+            overflow-y: auto;
+        }
+        #pdv-results::-webkit-scrollbar { width: 4px; }
+        #pdv-results::-webkit-scrollbar-track { background: transparent; }
+        #pdv-results::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        .result-row {
+            display: grid;
+            grid-template-columns: 120px 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #1e293b;
+            cursor: pointer;
+            transition: background .1s;
+        }
+        .result-row:hover { background: #1e293b; }
+        .result-row .cod { font-family: monospace; font-size: 11px; color: #64748b; }
+        .result-row .desc { font-size: 14px; font-weight: 500; color: #e2e8f0; }
+        .result-row .unit { font-size: 11px; color: #64748b; }
+        .result-row .price { font-size: 15px; font-weight: 700; color: #34d399; white-space: nowrap; }
+        .result-row .stock { font-size: 11px; color: #94a3b8; text-align: right; }
+        .result-row .add-btn {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            width: 32px; height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s;
+        }
+        .result-row .add-btn:hover { background: #2563eb; }
+
+        .pdv-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #334155;
+        }
+        .pdv-empty i { font-size: 64px; }
+        .pdv-empty p { font-size: 13px; margin-top: 8px; }
+
+        /* Right panel */
+        #pdv-right {
+            display: flex;
+            flex-direction: column;
+            background: #1e293b;
+            overflow: hidden;
+        }
+
+        /* Cart */
+        #pdv-cart {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        #pdv-cart::-webkit-scrollbar { width: 4px; }
+        #pdv-cart::-webkit-scrollbar-track { background: transparent; }
+        #pdv-cart::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        .cart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        .cart-header span { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+        .cart-header button { font-size: 11px; color: #ef4444; background: none; border: none; cursor: pointer; }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #1e3a5f22;
+        }
+        .cart-item .item-desc { font-size: 13px; font-weight: 500; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item .item-price { font-size: 11px; color: #64748b; }
+        .cart-item .qty-ctrl { display: flex; align-items: center; gap: 4px; }
+        .cart-item .qty-btn {
+            width: 24px; height: 24px;
+            background: #334155;
+            border: none; color: #e2e8f0;
+            border-radius: 4px; font-size: 14px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background .1s;
+        }
+        .cart-item .qty-btn:hover { background: #475569; }
+        .cart-item .qty-input {
+            width: 48px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            color: #f1f5f9;
+            font-size: 13px;
+            text-align: center;
+            padding: 2px 4px;
+            outline: none;
+        }
+        .cart-item .subtotal { font-size: 14px; font-weight: 700; color: #34d399; text-align: right; white-space: nowrap; }
+        .cart-item .del-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 2px; }
+
+        .cart-empty {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px 20px;
+            color: #334155;
+        }
+        .cart-empty i { font-size: 48px; }
+        .cart-empty p { font-size: 12px; margin-top: 6px; }
+
+        /* Totals */
+        #pdv-totals {
+            padding: 10px 14px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .total-row .label { font-size: 12px; color: #94a3b8; }
+        .total-row .value { font-size: 13px; color: #cbd5e1; }
+        .discount-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+        .discount-row input, .discount-row select {
+            background: #1e293b; border: 1px solid #334155; border-radius: 5px;
+            color: #f1f5f9; font-size: 12px; padding: 4px 8px; outline: none;
+        }
+        .discount-row input { width: 80px; }
+        .discount-row select { flex: 1; }
+        .grand-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; padding-top: 8px; border-top: 1px solid #334155; }
+        .grand-total .label { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+        .grand-total .value { font-size: 28px; font-weight: 800; color: #34d399; letter-spacing: -1px; }
+
+        /* Payment */
+        #pdv-payment {
+            padding: 10px 14px;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            flex-shrink: 0;
+        }
+        .fp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+        .fp-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 8px 4px;
+            background: #0f172a; border: 2px solid #334155;
+            border-radius: 8px; cursor: pointer;
+            transition: all .15s; gap: 2px;
+        }
+        .fp-btn i { font-size: 20px; color: #64748b; }
+        .fp-btn span { font-size: 10px; color: #94a3b8; font-weight: 500; }
+        .fp-btn .fp-key {
+            font-size: 9px; color: #475569; background: #0f172a;
+            border: 1px solid #334155; border-radius: 3px;
+            padding: 0 4px; line-height: 14px; margin-top: 2px;
+            font-family: monospace;
+        }
+        .fp-btn.active { border-color: #3b82f6; background: #1d4ed822; }
+        .fp-btn.active i, .fp-btn.active span { color: #60a5fa; }
+        .fp-btn.active .fp-key { color: #93c5fd; border-color: #3b82f6; background: #1e3a5f; }
+
+        .cash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .cash-field label { font-size: 11px; color: #94a3b8; display: block; margin-bottom: 3px; }
+        .cash-field input {
+            width: 100%; background: #0f172a; border: 1px solid #334155;
+            border-radius: 6px; color: #f1f5f9; font-size: 15px; font-weight: 600;
+            padding: 6px 10px; outline: none;
+        }
+        .troco-value {
+            background: #0f172a; border: 1px solid #334155;
+            border-radius: 6px; color: #34d399; font-size: 15px; font-weight: 700;
+            padding: 6px 10px;
+        }
+
+        .msg-box {
+            padding: 8px 12px; border-radius: 6px;
+            font-size: 12px; margin-bottom: 8px;
+        }
+        .msg-ok { background: #14532d44; border: 1px solid #16a34a; color: #86efac; }
+        .msg-err { background: #7f1d1d44; border: 1px solid #dc2626; color: #fca5a5; }
+
+        .btn-finalizar {
+            width: 100%;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .3px;
+            transition: background .15s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-finalizar:hover:not(:disabled) { background: #15803d; }
+        .btn-finalizar:disabled { background: #1e3a2e; color: #4b7a5c; cursor: not-allowed; }
+
+        /* MP Point modal */
+        .mp-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .mp-modal {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 36px 40px;
+            min-width: 360px;
+            max-width: 440px;
+            text-align: center;
+        }
+        .mp-modal h2 { font-size: 20px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+        .mp-modal p  { font-size: 14px; color: #94a3b8; margin-bottom: 4px; }
+        .mp-modal .amount { font-size: 36px; font-weight: 800; color: #34d399; margin: 12px 0; }
+        .mp-modal .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #334155;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin: 20px auto;
+        }
+        .mp-modal .icon-ok  { font-size: 56px; color: #34d399; margin: 12px 0; }
+        .mp-modal .icon-err { font-size: 56px; color: #ef4444; margin: 12px 0; }
+        .mp-modal .btn-row  { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+        .mp-modal .btn-sim  { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; }
+        .mp-modal .btn-nao  { background: #334155; color: #e2e8f0; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .mp-modal .btn-cancelar { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; border-radius: 8px; padding: 10px 24px; font-size: 13px; cursor: pointer; margin-top: 16px; }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Price edit inline */
+        .price-edit-btn { background: none; border: none; color: #475569; cursor: pointer; padding: 0 2px; font-size: 12px; line-height: 1; vertical-align: middle; }
+        .price-edit-btn:hover { color: #f59e0b; }
+        .price-edit-input { width: 72px; background: #0f172a; border: 1px solid #f59e0b; border-radius: 4px; color: #f1f5f9; font-size: 13px; padding: 2px 6px; outline: none; }
+        .price-edit-ok, .price-edit-cancel { background: none; border: none; cursor: pointer; font-size: 14px; padding: 0 2px; }
+        .price-edit-ok { color: #34d399; }
+        .price-edit-cancel { color: #ef4444; }
+
+        /* Fiscal authorization modal */
+        .fiscal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.85);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000;
+        }
+        .fiscal-modal {
+            background: #1e293b;
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 32px 36px;
+            min-width: 340px;
+            max-width: 420px;
+            text-align: center;
+        }
+        .fiscal-modal .fiscal-icon { font-size: 48px; color: #f59e0b; margin-bottom: 4px; }
+        .fiscal-modal h2 { font-size: 17px; font-weight: 700; color: #fbbf24; margin-bottom: 6px; }
+        .fiscal-modal .acao-desc { font-size: 13px; color: #94a3b8; margin-bottom: 18px; }
+        .fiscal-modal label { display: block; text-align: left; font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+        .fiscal-modal input {
+            width: 100%;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 16px;
+            padding: 10px 14px;
+            outline: none;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .fiscal-modal input:focus { border-color: #f59e0b; }
+        .fiscal-modal .erro-fiscal { color: #f87171; font-size: 12px; margin-bottom: 8px; text-align: left; }
+        .fiscal-modal .btn-confirmar-fiscal {
+            width: 100%;
+            background: #d97706; color: #fff;
+            border: none; border-radius: 8px;
+            padding: 12px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: background .15s;
+        }
+        .fiscal-modal .btn-confirmar-fiscal:hover:not(:disabled) { background: #b45309; }
+        .fiscal-modal .btn-confirmar-fiscal:disabled { background: #4b3510; color: #8b6914; cursor: not-allowed; }
+        .fiscal-modal .btn-cancelar-fiscal {
+            width: 100%; background: transparent; color: #64748b;
+            border: 1px solid #334155; border-radius: 8px;
+            padding: 9px; font-size: 13px; cursor: pointer; margin-top: 8px;
+        }
+        .btn-fiscal-acao { background: #d97706 !important; }
+        .btn-fiscal-acao:hover:not(:disabled) { background: #b45309 !important; }
+    </style>
+</head>
+<body>
+
+<div x-data="pdv(@Model.Sessao.Id)" style="height:100%;display:flex;flex-direction:column">
+
+    <!-- Top bar -->
+    <div id="pdv-topbar">
+        <div class="logo">
+            <i class='bx bx-store' style="font-size:18px;color:#3b82f6"></i>
+            PDV
+        </div>
+        <span class="sep">|</span>
+        <span class="info">
+            Sessão #@Model.Sessao.Id &nbsp;·&nbsp;
+            Operador: @Model.Sessao.Operador.Nome &nbsp;·&nbsp;
+            Aberto: @Model.Sessao.AbertoEm.ToLocalTime().ToString("dd/MM HH:mm")
+        </span>
+        <span class="clock" x-text="relogio"></span>
+        <button onclick="pausarPdv()" id="btn-pausar"
+                style="background:#f59e0b;color:white;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;transition:background .15s"
+                onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+            <i class='bx bx-pause'></i> Pausar
+        </button>
+        <a href="/Pdv/FecharCaixa/@Model.Sessao.Id" class="btn-fechar"
+           onclick="return confirm('Fechar o caixa agora?')">
+            <i class='bx bx-door-open'></i> Fechar Caixa
+        </a>
+    </div>
+
+    <!-- Main -->
+    <div id="pdv-main">
+
+        <!-- LEFT: search + results -->
+        <div id="pdv-left">
+            <div id="pdv-search">
+                <div style="position:relative">
+                    <i class='bx bx-barcode search-icon'></i>
+                    <input type="text" x-model="busca" x-ref="buscaInput"
+                           @@keydown.enter.prevent="buscarProduto()"
+                           @@input.debounce.300ms="buscarProduto()"
+                           placeholder="Código de barras ou descrição do produto..."
+                           autofocus />
+                </div>
+            </div>
+
+            <div id="pdv-results">
+                <template x-if="resultados.length > 0">
+                    <div>
+                        <template x-for="p in resultados" :key="p.id">
+                            <div class="result-row" @@click="adicionarItem(p)">
+                                <span class="cod" x-text="p.codDeBarra ?? '—'"></span>
+                                <div>
+                                    <div class="desc" x-text="p.descricao"></div>
+                                    <div class="unit" x-text="p.unidade ?? ''"></div>
+                                </div>
+                                <div style="text-align:right">
+                                    <div class="price" x-text="'R$ ' + p.precoVenda.toFixed(2).replace('.',',')"></div>
+                                    <div class="stock" x-text="'Estq: ' + p.estoque"></div>
+                                </div>
+                                <button class="add-btn" @@click.stop="adicionarItem(p)">+</button>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template x-if="resultados.length === 0">
+                    <div class="pdv-empty" style="height:100%">
+                        <i class='bx bx-barcode-reader'></i>
+                        <p>Escaneie ou digite para buscar produtos</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- RIGHT: cart + totals + payment -->
+        <div id="pdv-right">
+
+            <!-- Cart header -->
+            <div class="cart-header">
+                <span>Carrinho <span x-text="'(' + cart.length + ')'"></span></span>
+                <button x-show="cart.length > 0" @@click="limparCarrinho()">
+                    <i class='bx bx-trash'></i> Limpar
+                </button>
+            </div>
+
+            <!-- Cart items -->
+            <div id="pdv-cart">
+                <template x-if="cart.length === 0">
+                    <div class="cart-empty">
+                        <i class='bx bx-cart'></i>
+                        <p>Carrinho vazio</p>
+                    </div>
+                </template>
+                <template x-for="(item, idx) in cart" :key="item.id">
+                    <div class="cart-item">
+                        <div>
+                            <div class="item-desc" x-text="item.descricao"></div>
+                            <template x-if="editandoPrecoIdx !== idx">
+                                <div style="display:flex;align-items:center;gap:3px">
+                                    <span class="item-price" x-text="'R$ ' + item.preco.toFixed(2).replace('.',',') + '/un'"></span>
+                                    <button class="price-edit-btn" @@click.stop="iniciarEditarPreco(idx)" title="Alterar preço">
+                                        <i class='bx bx-pencil'></i>
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="editandoPrecoIdx === idx">
+                                <div style="display:flex;align-items:center;gap:3px;margin-top:2px">
+                                    <input class="price-edit-input" type="number" x-model.number="editandoPrecoValor"
+                                           min="0.01" step="0.01"
+                                           @@keydown.enter.prevent="confirmarEditarPreco(idx)"
+                                           @@keydown.escape.prevent="editandoPrecoIdx = -1" />
+                                    <button class="price-edit-ok" @@click.stop="confirmarEditarPreco(idx)"><i class='bx bx-check'></i></button>
+                                    <button class="price-edit-cancel" @@click.stop="editandoPrecoIdx = -1"><i class='bx bx-x'></i></button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="qty-ctrl">
+                            <button class="qty-btn" @@click="decrementar(idx)">−</button>
+                            <input class="qty-input" type="number" x-model.number="item.quantidade"
+                                   @@change="atualizarItem(idx)" min="0.001" step="0.001" />
+                            <button class="qty-btn" @@click="incrementar(idx)">+</button>
+                        </div>
+                        <div style="text-align:right">
+                            <div class="subtotal" x-text="'R$ ' + item.subtotal.toFixed(2).replace('.',',')"></div>
+                            <button class="del-btn" @@click="solicitarFiscal({ tipo: 'remover', idx })"><i class='bx bx-x'></i></button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Totals -->
+            <div id="pdv-totals">
+                <div class="discount-row">
+                    <label style="font-size:11px;color:#94a3b8;flex-shrink:0;display:flex;align-items:center;gap:3px">
+                        Desconto:
+                        <i class='bx' :class="fiscalAutorizado ? 'bx-lock-open-alt' : 'bx-lock-alt'"
+                           :style="fiscalAutorizado ? 'color:#34d399;font-size:11px' : 'color:#475569;font-size:11px'"></i>
+                    </label>
+                    <input type="number" x-model.number="desconto" @@change="descontoAlterado()"
+                           min="0" step="0.01" placeholder="0" />
+                    <select x-model="tipoDesconto" @@change="descontoAlterado()">
+                        <option value="real">R$</option>
+                        <option value="porcento">%</option>
+                    </select>
+                </div>
+                <div class="total-row">
+                    <span class="label">Subtotal</span>
+                    <span class="value" x-text="'R$ ' + subTotal.toFixed(2).replace('.',',')"></span>
+                </div>
+                <template x-if="descontoValor > 0">
+                    <div class="total-row">
+                        <span class="label" style="color:#f87171">Desconto</span>
+                        <span class="value" style="color:#f87171" x-text="'- R$ ' + descontoValor.toFixed(2).replace('.',',')"></span>
+                    </div>
+                </template>
+                <div class="grand-total">
+                    <span class="label">TOTAL</span>
+                    <span class="value" x-text="'R$ ' + total.toFixed(2).replace('.',',')"></span>
+                </div>
+            </div>
+
+            <!-- Payment -->
+            <div id="pdv-payment">
+                <div class="fp-grid">
+                    <template x-for="fp in formasPagamento" :key="fp.valor">
+                        <button class="fp-btn" :class="formaPagamento === fp.valor ? 'active' : ''"
+                                @@click="formaPagamento = fp.valor">
+                            <i :class="fp.icone"></i>
+                            <span x-text="fp.label"></span>
+                            <span class="fp-key" x-text="fp.atalho"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <template x-if="formaPagamento === 'dinheiro'">
+                    <div class="cash-row">
+                        <div class="cash-field">
+                            <label>Recebido</label>
+                            <input type="number" x-model.number="valorRecebido" min="0" step="0.01" placeholder="0,00" />
+                        </div>
+                        <div class="cash-field">
+                            <label>Troco</label>
+                            <div class="troco-value"
+                                 x-text="'R$ ' + Math.max(0, valorRecebido - total).toFixed(2).replace('.',',')"></div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="mensagem">
+                    <div :class="mensagemOk ? 'msg-box msg-ok' : 'msg-box msg-err'" x-text="mensagem"></div>
+                </template>
+
+                <template x-if="fiscalAutorizado">
+                    <div style="font-size:10px;color:#fbbf24;text-align:center;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:4px">
+                        <i class='bx bx-shield-check'></i>
+                        Fiscal: <strong x-text="fiscalNome"></strong>
+                    </div>
+                </template>
+
+                <button class="btn-finalizar"
+                        :class="fiscalAutorizado ? 'btn-fiscal-acao' : ''"
+                        @@click="finalizarVenda()"
+                        :disabled="cart.length === 0 || loading">
+                    <template x-if="loading">
+                        <i class='bx bx-loader-alt bx-spin'></i>
+                    </template>
+                    <i x-show="!loading" class='bx bx-check-circle'></i>
+                    <span x-text="loading ? 'Processando...' : (fiscalAutorizado ? 'FINALIZAR AÇÃO' : 'FINALIZAR VENDA')"></span>
+                    <span x-show="!loading"
+                          :style="fiscalAutorizado ? 'font-size:10px;background:#b45309;border:1px solid #92400e;border-radius:3px;padding:1px 6px;margin-left:4px;font-family:monospace;letter-spacing:0' : 'font-size:10px;background:#15803d;border:1px solid #166534;border-radius:3px;padding:1px 6px;margin-left:4px;font-family:monospace;letter-spacing:0'">Space</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Fiscal authorization modal -->
+    <template x-if="fiscalModal.visivel">
+        <div class="fiscal-overlay">
+            <div class="fiscal-modal">
+                <div class="fiscal-icon"><i class='bx bx-shield-quarter'></i></div>
+                <h2><i class='bx bx-lock-alt'></i>&nbsp;Autorização Fiscal</h2>
+                <p class="acao-desc" x-text="acaoFiscalDescricao()"></p>
+
+                <label for="fiscal-codigo">Código do cartão (escaneie ou digite)</label>
+                <input id="fiscal-codigo" type="text" x-model="fiscalModal.codigo"
+                       @@keydown.enter.prevent="$refs.fiscalPin.focus()"
+                       placeholder="Escaneie o código de barras"
+                       autocomplete="off" spellcheck="false" />
+
+                <label for="fiscal-pin">PIN fiscal</label>
+                <input id="fiscal-pin" x-ref="fiscalPin" type="password" x-model="fiscalModal.pin"
+                       @@keydown.enter.prevent="confirmarFiscal()"
+                       placeholder="••••"
+                       autocomplete="new-password" />
+
+                <template x-if="fiscalModal.erro">
+                    <p class="erro-fiscal"><i class='bx bx-error-circle'></i> <span x-text="fiscalModal.erro"></span></p>
+                </template>
+
+                <button class="btn-confirmar-fiscal"
+                        @@click="confirmarFiscal()"
+                        :disabled="fiscalModal.loading || !fiscalModal.codigo || !fiscalModal.pin">
+                    <template x-if="fiscalModal.loading">
+                        <i class='bx bx-loader-alt bx-spin'></i>
+                    </template>
+                    <span x-text="fiscalModal.loading ? 'Verificando...' : 'Confirmar Autorização'"></span>
+                </button>
+                <button class="btn-cancelar-fiscal" @@click="fecharFiscalModal()">Cancelar</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- MP Point modal -->
+    <template x-if="mpModal.visivel">
+        <div class="mp-overlay">
+            <div class="mp-modal">
+
+                <!-- Aguardando -->
+                <template x-if="mpModal.estado === 'aguardando'">
+                    <div>
+                        <h2>Aguardando pagamento</h2>
+                        <div class="amount" x-text="'R$ ' + mpModal.total.toFixed(2).replace('.',',')"></div>
+                        <p x-text="mpModal.tipo"></p>
+                        <p style="font-size:12px;color:#64748b;margin-top:4px">Conclua o pagamento na maquininha</p>
+                        <div class="spinner"></div>
+                        <button class="btn-cancelar" @@click="cancelarPagamentoMp()">
+                            <i class='bx bx-x-circle'></i> Cancelar
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Confirmado -->
+                <template x-if="mpModal.estado === 'aprovado'">
+                    <div>
+                        <i class='bx bx-check-circle icon-ok'></i>
+                        <h2>Pagamento Confirmado!</h2>
+                        <div class="amount" x-text="'R$ ' + mpModal.total.toFixed(2).replace('.',',')"></div>
+                        <p style="color:#86efac;font-size:13px">Venda #<span x-text="mpModal.vendaId"></span> registrada com sucesso</p>
+                        <p style="margin-top:20px;font-size:15px;font-weight:600;color:#f1f5f9">Imprimir recibo?</p>
+                        <div class="btn-row">
+                            <button class="btn-sim" @@click="imprimirEFechar()">
+                                <i class='bx bx-printer'></i> Sim
+                            </button>
+                            <button class="btn-nao" @@click="fecharModalMp()">
+                                Não
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Recusado / Erro -->
+                <template x-if="mpModal.estado === 'erro'">
+                    <div>
+                        <i class='bx bx-x-circle icon-err'></i>
+                        <h2>Pagamento não aprovado</h2>
+                        <p x-text="mpModal.erroMsg"></p>
+                        <div class="btn-row">
+                            <button class="btn-nao" @@click="fecharModalMp()">Fechar</button>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+        </div>
+    </template>
+
+</div>
+
+<div id="pdv-lock" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.97);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+    <div style="text-align:center;color:#f8fafc">
+        <i class='bx bx-lock-alt' style="font-size:64px;color:#f59e0b"></i>
+        <p style="font-size:22px;font-weight:700;margin-top:12px">PDV Pausado</p>
+        <p style="font-size:14px;color:#94a3b8;margin-top:4px">Informe sua senha para retomar</p>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:24px;width:300px">
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+            <input id="pin-input" type="password" maxlength="200" placeholder="Senha"
+                   style="flex:1;background:#0f172a;border:2px solid #334155;border-radius:8px;color:#f1f5f9;font-size:20px;padding:10px 14px;outline:none;text-align:center;letter-spacing:4px"
+                   onkeydown="if(event.key==='Enter') retomarPdv()" />
+        </div>
+        <button onclick="retomarPdv()"
+                style="width:100%;background:#3b82f6;color:white;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
+            Desbloquear
+        </button>
+        <div id="pin-erro" style="color:#f87171;text-align:center;margin-top:8px;font-size:13px;display:none"></div>
+    </div>
+    <div id="pdv-lock-timer" style="color:#475569;font-size:13px"></div>
+</div>
+
+<form id="csrf-form">@Html.AntiForgeryToken()</form>
+
+<script>
+function pdv(sessaoId) {
+    return {
+        sessaoId,
+        busca: '',
+        resultados: [],
+        cart: [],
+        desconto: 0,
+        tipoDesconto: 'real',
+        formaPagamento: 'dinheiro',
+        valorRecebido: 0,
+        loading: false,
+        mensagem: '',
+        mensagemOk: false,
+        subTotal: 0,
+        descontoValor: 0,
+        total: 0,
+        relogio: '',
+        mpModal: {
+            visivel: false,
+            estado: 'aguardando',  // aguardando | aprovado | erro
+            total: 0,
+            tipo: '',
+            vendaId: null,
+            paymentIntentId: null,
+            erroMsg: '',
+            _pollTimer: null,
+        },
+        fiscalModal: {
+            visivel: false,
+            codigo: '',
+            pin: '',
+            loading: false,
+            erro: '',
+        },
+        acaoPendente: null,
+        fiscalAutorizado: false,
+        fiscalNome: '',
+        editandoPrecoIdx: -1,
+        editandoPrecoValor: 0,
+
+        formasPagamento: [
+            { valor: 'dinheiro', label: 'Dinheiro', icone: 'bx bx-money',             atalho: 'F1' },
+            { valor: 'pix',      label: 'PIX',       icone: 'bx bxl-paypal',           atalho: 'F2' },
+            { valor: 'debito',   label: 'Débito',    icone: 'bx bx-credit-card',       atalho: 'F3' },
+            { valor: 'credito',  label: 'Crédito',   icone: 'bx bx-credit-card-front', atalho: 'F4' },
+            { valor: 'fiado',    label: 'Fiado',     icone: 'bx bx-user-check',        atalho: 'F5' },
+        ],
+
+        init() {
+            this.atualizarRelogio();
+            setInterval(() => this.atualizarRelogio(), 1000);
+            document.addEventListener('keydown', (e) => this.atalho(e));
+        },
+
+        atalho(e) {
+            // F1–F5: selecionar forma de pagamento
+            const fMap = { F1: 'dinheiro', F2: 'pix', F3: 'debito', F4: 'credito', F5: 'fiado' };
+            if (fMap[e.key]) {
+                e.preventDefault();
+                this.formaPagamento = fMap[e.key];
+                return;
+            }
+            // Espaço: finalizar venda (apenas quando não há foco em input/textarea/select)
+            if (e.key === ' ') {
+                const tag = document.activeElement?.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                e.preventDefault();
+                this.finalizarVenda();
+            }
+        },
+
+        atualizarRelogio() {
+            const now = new Date();
+            this.relogio = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        },
+
+        async buscarProduto() {
+            const q = this.busca.trim();
+            if (!q) { this.resultados = []; return; }
+            const res = await fetch(`/Pdv/Index?handler=BuscarProduto&q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            this.resultados = data;
+            if (data.length === 1 && data[0].codDeBarra === q) {
+                this.adicionarItem(data[0]);
+                this.busca = '';
+                this.resultados = [];
+                this.$refs.buscaInput.focus();
+            }
+        },
+
+        adicionarItem(produto) {
+            const idx = this.cart.findIndex(i => i.id === produto.id);
+            if (idx >= 0) {
+                this.cart[idx].quantidade += 1;
+                this.cart[idx].subtotal = this.cart[idx].quantidade * this.cart[idx].preco;
+            } else {
+                this.cart.push({
+                    id: produto.id,
+                    descricao: produto.descricao,
+                    preco: produto.precoVenda,
+                    quantidade: 1,
+                    subtotal: produto.precoVenda,
+                });
+            }
+            this.calcular();
+            this.busca = '';
+            this.resultados = [];
+            this.$refs.buscaInput.focus();
+        },
+
+        removerItem(idx)  { this.cart.splice(idx, 1); this.calcular(); },
+        limparCarrinho()  {
+            this.cart = []; this.calcular();
+            this.fiscalAutorizado = false; this.fiscalNome = '';
+            this.editandoPrecoIdx = -1;
+        },
+        incrementar(idx)  { this.cart[idx].quantidade += 1; this.atualizarItem(idx); },
+        decrementar(idx)  {
+            if (this.cart[idx].quantidade > 1) { this.cart[idx].quantidade -= 1; this.atualizarItem(idx); }
+            else this.removerItem(idx);
+        },
+        atualizarItem(idx) {
+            if (this.cart[idx].quantidade <= 0) { this.removerItem(idx); return; }
+            this.cart[idx].subtotal = this.cart[idx].quantidade * this.cart[idx].preco;
+            this.calcular();
+        },
+        calcular() {
+            this.subTotal = this.cart.reduce((s, i) => s + i.subtotal, 0);
+            this.descontoValor = this.tipoDesconto === 'porcento'
+                ? this.subTotal * this.desconto / 100
+                : this.desconto;
+            this.total = Math.max(0, this.subTotal - this.descontoValor);
+        },
+
+        descontoAlterado() {
+            this.calcular();
+            if (this.desconto > 0 && !this.fiscalAutorizado) {
+                this.solicitarFiscal({ tipo: 'desconto' });
+            }
+        },
+
+        csrfToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        },
+
+        async finalizarVenda() {
+            if (this.cart.length === 0) return;
+            this.loading = true;
+            this.mensagem = '';
+            try {
+                const res = await fetch('/Pdv/Index?handler=FinalizarVenda', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.csrfToken() },
+                    body: JSON.stringify({
+                        itens: this.cart.map(i => ({ produtoId: i.id, quantidade: i.quantidade, preco: i.preco })),
+                        desconto: this.desconto,
+                        tipoDesconto: this.tipoDesconto,
+                        formaPagamento: this.formaPagamento,
+                        valorRecebido: this.valorRecebido,
+                    })
+                });
+                const data = await res.json();
+                if (!data.ok) {
+                    this.mensagem = data.erro || 'Erro ao finalizar venda.';
+                    this.mensagemOk = false;
+                    return;
+                }
+
+                // Venda registrada — verificar se há intent de pagamento na maquininha
+                if (data.mpPoint && data.paymentIntentId) {
+                    const tipoLabel = { pix: 'PIX', debito: 'Débito', credito: 'Crédito' }[this.formaPagamento] ?? this.formaPagamento;
+                    this.abrirModalMp(data.paymentIntentId, data.vendaId, data.total, tipoLabel);
+                    this.limparCarrinho();
+                    this.desconto = 0; this.valorRecebido = 0; this.calcular();
+                } else {
+                    // Pagamento dinheiro/fiado ou MP não configurado — fluxo normal
+                    if (data.mpErro) {
+                        this.mensagem = `⚠ Venda #${data.vendaId} salva, mas falha na maquininha: ${data.mpErro}`;
+                        this.mensagemOk = false;
+                    } else {
+                        this.mensagem = `✓ Venda #${data.vendaId} — R$ ${parseFloat(data.total).toFixed(2).replace('.',',')}`;
+                        this.mensagemOk = true;
+                        setTimeout(() => { this.mensagem = ''; }, 6000);
+                    }
+                    await this.imprimirCupom(data.vendaId);
+                    this.limparCarrinho();
+                    this.desconto = 0; this.valorRecebido = 0; this.calcular();
+                    this.fiscalAutorizado = false; this.fiscalNome = '';
+                }
+            } catch (e) {
+                this.mensagem = 'Erro de comunicação com o servidor.';
+                this.mensagemOk = false;
+            } finally {
+                this.loading = false;
+                this.$refs.buscaInput.focus();
+            }
+        },
+
+        // ── MP Point modal ────────────────────────────────────────────────────
+        abrirModalMp(intentId, vendaId, total, tipo) {
+            this.mpModal.visivel        = true;
+            this.mpModal.estado         = 'aguardando';
+            this.mpModal.paymentIntentId = intentId;
+            this.mpModal.vendaId        = vendaId;
+            this.mpModal.total          = parseFloat(total);
+            this.mpModal.tipo           = tipo;
+            this.mpModal.erroMsg        = '';
+            this.iniciarPolling();
+        },
+
+        iniciarPolling() {
+            if (this.mpModal._pollTimer) clearInterval(this.mpModal._pollTimer);
+            this.mpModal._pollTimer = setInterval(() => this.pollStatus(), 2000);
+        },
+
+        async pollStatus() {
+            try {
+                const res = await fetch(`/Pdv/Index?handler=StatusPagamento&id=${this.mpModal.paymentIntentId}`);
+                const data = await res.json();
+
+                // FINISHED = transação concluída na máquina, verificar estado do pagamento
+                if (data.status === 'FINISHED') {
+                    this.pararPolling();
+                    if (data.estado === 'approved') {
+                        this.mpModal.estado = 'aprovado';
+                    } else {
+                        this.mpModal.estado = 'erro';
+                        this.mpModal.erroMsg = data.estado === 'rejected'
+                            ? 'Pagamento recusado pela operadora.'
+                            : `Status: ${data.estado ?? 'desconhecido'}`;
+                    }
+                } else if (data.status === 'CANCELED' || data.status === 'ERROR') {
+                    this.pararPolling();
+                    this.mpModal.estado = 'erro';
+                    this.mpModal.erroMsg = data.status === 'CANCELED'
+                        ? 'Pagamento cancelado.'
+                        : 'Erro na maquininha.';
+                }
+                // OPEN | ON_TERMINAL | PROCESSING → continua aguardando
+            } catch (e) { /* ignora falha pontual de rede */ }
+        },
+
+        pararPolling() {
+            if (this.mpModal._pollTimer) { clearInterval(this.mpModal._pollTimer); this.mpModal._pollTimer = null; }
+        },
+
+        fecharModalMp() {
+            this.pararPolling();
+            this.mpModal.visivel = false;
+            this.$refs.buscaInput.focus();
+        },
+
+        async cancelarPagamentoMp() {
+            this.pararPolling();
+            try {
+                await fetch('/Pdv/Index?handler=CancelarPagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.csrfToken() },
+                    body: JSON.stringify({})
+                });
+            } catch (e) {}
+            this.mpModal.estado  = 'erro';
+            this.mpModal.erroMsg = 'Pagamento cancelado pelo operador.';
+        },
+
+        async imprimirEFechar() {
+            await this.imprimirCupom(this.mpModal.vendaId);
+            this.fecharModalMp();
+        },
+
+        async imprimirCupom(vendaId) {
+            try {
+                await fetch('/Pdv/Index?handler=Imprimir', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.csrfToken() },
+                    body: JSON.stringify({ vendaId })
+                });
+            } catch (e) { /* silencioso */ }
+        },
+
+        // ── Fiscal PDV authorization ──────────────────────────────────────────
+        solicitarFiscal(acao) {
+            this.acaoPendente = acao;
+            this.fiscalModal.visivel = true;
+            this.fiscalModal.codigo  = '';
+            this.fiscalModal.pin     = '';
+            this.fiscalModal.erro    = '';
+            this.$nextTick(() => { document.getElementById('fiscal-codigo')?.focus(); });
+        },
+
+        acaoFiscalDescricao() {
+            const t = this.acaoPendente?.tipo;
+            if (t === 'remover')  return 'Remoção de item requer autorização do Fiscal PDV.';
+            if (t === 'desconto') return 'Aplicação de desconto requer autorização do Fiscal PDV.';
+            if (t === 'preco')    return 'Alteração de preço requer autorização do Fiscal PDV.';
+            return 'Esta ação requer autorização do Fiscal PDV.';
+        },
+
+        async confirmarFiscal() {
+            if (!this.fiscalModal.codigo || !this.fiscalModal.pin) {
+                this.fiscalModal.erro = 'Preencha o código e o PIN.';
+                return;
+            }
+            this.fiscalModal.loading = true;
+            this.fiscalModal.erro    = '';
+            try {
+                const res = await fetch('/Pdv/Index?handler=AutorizarFiscal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': this.csrfToken() },
+                    body: JSON.stringify({
+                        codigo: this.fiscalModal.codigo,
+                        pin:    this.fiscalModal.pin,
+                        acao:   this.acaoPendente?.tipo,
+                    })
+                });
+                const data = await res.json();
+                if (!data.ok) { this.fiscalModal.erro = data.erro || 'Autorização negada.'; return; }
+
+                this.fiscalAutorizado = true;
+                this.fiscalNome = data.fiscal;
+                this.executarAcaoPendente();
+                this.fecharFiscalModal();
+            } catch (e) {
+                this.fiscalModal.erro = 'Erro de comunicação.';
+            } finally {
+                this.fiscalModal.loading = false;
+            }
+        },
+
+        executarAcaoPendente() {
+            const acao = this.acaoPendente;
+            if (!acao) return;
+            if (acao.tipo === 'remover') {
+                this.cart.splice(acao.idx, 1);
+                this.calcular();
+            } else if (acao.tipo === 'preco') {
+                this.cart[acao.idx].preco    = acao.novoPreco;
+                this.cart[acao.idx].subtotal = this.cart[acao.idx].quantidade * acao.novoPreco;
+                this.calcular();
+                this.editandoPrecoIdx = -1;
+            }
+            // 'desconto': discount value stays as typed — no extra action needed
+        },
+
+        fecharFiscalModal() {
+            const acao = this.acaoPendente;
+            this.fiscalModal.visivel = false;
+            this.acaoPendente = null;
+            // If discount auth was canceled, revert
+            if (acao?.tipo === 'desconto') { this.desconto = 0; this.calcular(); }
+            this.$refs.buscaInput?.focus();
+        },
+
+        iniciarEditarPreco(idx) {
+            this.editandoPrecoIdx   = idx;
+            this.editandoPrecoValor = this.cart[idx].preco;
+            this.$nextTick(() => { document.querySelector('.price-edit-input')?.select(); });
+        },
+
+        confirmarEditarPreco(idx) {
+            const novo = parseFloat(this.editandoPrecoValor);
+            if (isNaN(novo) || novo <= 0) return;
+            if (novo === this.cart[idx].preco) { this.editandoPrecoIdx = -1; return; }
+            this.solicitarFiscal({ tipo: 'preco', idx, novoPreco: novo });
+        },
+    };
+}
+
+let pausaInicio = null;
+let timerInterval = null;
+
+async function pausarPdv() {
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    const res = await fetch('/Pdv?handler=Pausar', {
+        method: 'POST',
+        headers: { 'RequestVerificationToken': token }
+    });
+    const data = await res.json();
+    if (data.ok) {
+        pausaInicio = Date.now();
+        document.getElementById('pdv-lock').style.display = 'flex';
+        document.getElementById('pin-input').focus();
+        timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - pausaInicio) / 1000);
+            const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            document.getElementById('pdv-lock-timer').textContent = `Pausa: ${m}:${s}`;
+        }, 1000);
+    } else {
+        alert('Erro ao pausar: ' + data.erro);
+    }
+}
+
+async function retomarPdv() {
+    const pin = document.getElementById('pin-input').value;
+    const erroEl = document.getElementById('pin-erro');
+    erroEl.style.display = 'none';
+    if (!pin) { erroEl.textContent = 'Informe a senha.'; erroEl.style.display = 'block'; return; }
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    const res = await fetch('/Pdv?handler=Retomar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ pin })
+    });
+    const data = await res.json();
+    if (data.ok) {
+        clearInterval(timerInterval);
+        document.getElementById('pdv-lock').style.display = 'none';
+        document.getElementById('pin-input').value = '';
+    } else {
+        erroEl.textContent = data.erro || 'PIN incorreto.';
+        erroEl.style.display = 'block';
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-input').focus();
+    }
+}
+</script>
+</body>
+</html>

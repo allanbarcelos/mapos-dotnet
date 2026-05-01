@@ -1,0 +1,123 @@
+@page
+@model mapos_dotnet.Pages.Pesquisar.IndexModel
+@{ ViewData["Title"] = "Pesquisar"; }
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">Pesquisar</h1>
+    <form method="get" class="flex gap-3 max-w-xl">
+        <input type="search" name="termo" value="@Model.Termo" autofocus
+               placeholder="Clientes, OS, vendas, produtos..."
+               class="form-input flex-1" />
+        <button type="submit" class="btn-primary"><i class='bx bx-search'></i> Buscar</button>
+    </form>
+</div>
+
+@if (Model.Termo is not null)
+{
+    if (Model.Total == 0)
+    {
+        <div class="card card-body text-center py-12 text-gray-400">
+            <i class='bx bx-search-alt text-5xl mb-3 block'></i>
+            <p class="text-lg">Nenhum resultado para "<strong>@Model.Termo</strong>"</p>
+        </div>
+    }
+    else
+    {
+        <p class="text-sm text-gray-500 mb-4">@Model.Total resultado(s) para "<strong>@Model.Termo</strong>"</p>
+
+        @if (Model.Clientes.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header"><h3 class="font-semibold">Clientes (@Model.Clientes.Count)</h3></div>
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Nome</th><th>Documento</th><th>Telefone</th><th>E-mail</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var c in Model.Clientes)
+                    {
+                        <tr>
+                            <td class="text-gray-400 text-xs">@c.Id</td>
+                            <td class="font-medium">@c.NomeCliente</td>
+                            <td class="text-xs text-gray-500">@(c.Documento ?? "-")</td>
+                            <td class="text-xs text-gray-500">@(c.Telefone ?? c.Celular ?? "-")</td>
+                            <td class="text-xs text-gray-500">@(c.Email ?? "-")</td>
+                            <td><a href="/Clientes/Visualizar/@c.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-show text-xs'></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.OsList.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header"><h3 class="font-semibold">Ordens de Serviço (@Model.OsList.Count)</h3></div>
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Cliente</th><th>Status</th><th>Data</th><th class="text-right">Total</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var os in Model.OsList)
+                    {
+                        var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+                        <tr>
+                            <td class="text-gray-400 text-xs">@os.Id</td>
+                            <td class="text-sm">@os.Cliente.NomeCliente</td>
+                            <td><span class="badge-gray text-xs">@os.Status</span></td>
+                            <td class="text-xs text-gray-500">@(os.DataInicial?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td class="text-right font-medium text-sm">@os.ValorTotal.ToString("C", ptBR)</td>
+                            <td><a href="/Os/Visualizar/@os.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-show text-xs'></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.Vendas.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header"><h3 class="font-semibold">Vendas (@Model.Vendas.Count)</h3></div>
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Cliente</th><th>Status</th><th>Data</th><th class="text-right">Total</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var v in Model.Vendas)
+                    {
+                        var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+                        <tr>
+                            <td class="text-gray-400 text-xs">@v.Id</td>
+                            <td class="text-sm">@v.Cliente.NomeCliente</td>
+                            <td><span class="badge-gray text-xs">@v.Status</span></td>
+                            <td class="text-xs text-gray-500">@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                            <td class="text-right font-medium text-sm">@v.ValorTotal.ToString("C", ptBR)</td>
+                            <td><a href="/Vendas/Visualizar/@v.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-show text-xs'></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (Model.Produtos.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header"><h3 class="font-semibold">Produtos (@Model.Produtos.Count)</h3></div>
+                <table class="table-mapos">
+                    <thead><tr><th>#</th><th>Descrição</th><th>Cód. Barras</th><th class="text-right">Preço Venda</th><th class="text-right">Estoque</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var p in Model.Produtos)
+                    {
+                        var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+                        <tr>
+                            <td class="text-gray-400 text-xs">@p.Id</td>
+                            <td class="font-medium text-sm">@p.Descricao</td>
+                            <td class="font-mono text-xs text-gray-500">@(p.CodDeBarra ?? "-")</td>
+                            <td class="text-right text-sm">@p.PrecoVenda.ToString("C", ptBR)</td>
+                            <td class="text-right text-sm">@p.Estoque</td>
+                            <td><a href="/Produtos/Visualizar/@p.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-show text-xs'></i></a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+}

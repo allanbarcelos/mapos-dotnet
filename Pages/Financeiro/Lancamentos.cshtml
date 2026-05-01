@@ -1,0 +1,80 @@
+@page
+@model mapos_dotnet.Pages.Financeiro.LancamentosModel
+@{ ViewData["Title"] = "Lançamentos"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Lançamentos</h1>
+    <div class="flex gap-2">
+        <a href="/Financeiro/AdicionarReceita" class="btn-success btn-sm"><i class='bx bx-plus'></i> Receita</a>
+        <a href="/Financeiro/AdicionarDespesa" class="btn-danger btn-sm"><i class='bx bx-minus'></i> Despesa</a>
+        <a href="/Financeiro/Parcelar" class="btn-secondary btn-sm"><i class='bx bx-calendar'></i> Parcelar</a>
+    </div>
+</div>
+
+<form method="get" class="flex flex-wrap gap-3 items-end mb-4">
+    <div class="flex-1 min-w-40">
+        <label class="form-label text-xs">Pesquisar</label>
+        <input type="search" name="q" value="@Model.Q" class="form-input" placeholder="Descrição ou cliente..." />
+    </div>
+    <div>
+        <label class="form-label text-xs">Tipo</label>
+        <select name="tipo" class="form-select w-32">
+            @foreach (var (val, label) in new[] { ("all", "Todos"), ("receita", "Receita"), ("despesa", "Despesa") }) {
+                if (val == Model.Tipo) { <option value="@val" selected>@label</option> }
+                else { <option value="@val">@label</option> }
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label text-xs">Situação</label>
+        <select name="situacao" class="form-select w-32">
+            @foreach (var (val, label) in new[] { ("all", "Todas"), ("pendente", "Pendente"), ("pago", "Pago") }) {
+                if (val == Model.Situacao) { <option value="@val" selected>@label</option> }
+                else { <option value="@val">@label</option> }
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+</form>
+
+<div class="card">
+    <div class="overflow-x-auto">
+        <table class="table-mapos">
+            <thead>
+                <tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Cliente/Forn.</th><th>Vencimento</th><th>Pagamento</th><th class="text-right">Valor</th><th>Situação</th><th>Conta</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var l in Model.Items) {
+                <tr>
+                    <td class="text-gray-400 text-xs">@l.Id</td>
+                    <td>@l.Descricao</td>
+                    <td><span class="@(l.Tipo=="receita"?"badge-green":"badge-red")">@l.Tipo</span></td>
+                    <td class="text-xs text-gray-500">@(l.ClienteFornecedor ?? "-")</td>
+                    <td class="text-xs">@l.DataVencimento.ToString("dd/MM/yyyy")</td>
+                    <td class="text-xs">@(l.DataPagamento.HasValue ? l.DataPagamento.Value.ToString("dd/MM/yyyy") : "-")</td>
+                    <td class="text-right font-medium">@l.ValorDesconto.ToString("N2")</td>
+                    <td><span class="@(l.Baixado?"badge-green":"badge-yellow")">@(l.Baixado?"Pago":"Pendente")</span></td>
+                    <td class="text-xs text-gray-500">@(l.Conta?.Nome ?? "-")</td>
+                    <td>
+                        <div class="flex gap-1">
+                            <a href="/Financeiro/Editar/@l.Id" class="btn-secondary btn-sm px-2"><i class='bx bx-edit text-xs'></i></a>
+                            @if (!l.Baixado) {
+                            <form method="post" asp-page-handler="Baixar" asp-route-id="@l.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-success btn-sm px-2" title="Baixar"><i class='bx bx-check text-xs'></i></button>
+                            </form>
+                            }
+                            <form method="post" asp-page-handler="Excluir" asp-route-id="@l.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-danger btn-sm px-2" onclick="return confirm('Excluir lançamento?')"><i class='bx bx-trash text-xs'></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="10" class="text-center py-8 text-gray-400">Nenhum lançamento encontrado</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, "/Financeiro/Lancamentos"))
+</div>

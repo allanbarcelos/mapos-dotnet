@@ -1,0 +1,77 @@
+@page
+@model mapos_dotnet.Pages.Emails.IndexModel
+@{ ViewData["Title"] = "Fila de E-mails"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Fila de E-mails</h1>
+    <form method="post" asp-page-handler="Limpar">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn-secondary btn-sm"
+                onclick="return confirm('Remover todos os e-mails já enviados?')">
+            <i class='bx bx-trash'></i> Limpar enviados
+        </button>
+    </form>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="flex gap-3 flex-wrap">
+            <select name="status" class="form-select text-sm w-40">
+                <option value="">Todos status</option>
+                @foreach (var s in new[] { "pending", "sending", "sent", "failed" })
+                {
+                    if (s == Model.FiltroStatus) { <option value="@s" selected>@s</option> }
+                    else { <option value="@s">@s</option> }
+                }
+            </select>
+            <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+            @if (Model.FiltroStatus is not null)
+            { <a href="/Emails" class="btn-secondary btn-sm">Limpar filtro</a> }
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table-mapos">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Para</th>
+                <th>Assunto</th>
+                <th>Status</th>
+                <th>Data</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var e in Model.Items)
+        {
+            var badgeClass = e.Status switch {
+                "sent"    => "badge-green",
+                "failed"  => "badge-red",
+                "sending" => "badge-yellow",
+                _         => "badge-gray"
+            };
+            <tr>
+                <td class="text-gray-400 text-xs">@e.Id</td>
+                <td class="text-sm">@e.To</td>
+                <td class="text-sm text-gray-600">@e.Subject</td>
+                <td><span class="@badgeClass">@e.Status</span></td>
+                <td class="text-xs text-gray-500">@(e.Date?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                <td>
+                    <form method="post" asp-page-handler="Excluir" asp-route-id="@e.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-danger btn-sm px-2"
+                                onclick="return confirm('Remover este e-mail da fila?')">
+                            <i class='bx bx-trash text-xs'></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Items.Any())
+        { <tr><td colspan="6" class="text-center py-8 text-gray-400">Fila vazia</td></tr> }
+        </tbody>
+    </table>
+    @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, "/Emails"))
+</div>

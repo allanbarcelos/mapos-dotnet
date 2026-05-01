@@ -1,0 +1,180 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Mine.VisualizarOsModel
+@{
+    ViewData["Title"] = $"OS #{Model.Os.Id}";
+    var ptBR = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Mine/Os" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">OS #@Model.Os.Id</h1>
+        <p class="text-sm text-gray-500 mt-0.5">@Model.Os.DataInicial?.ToString("dd/MM/yyyy")</p>
+    </div>
+    <div class="ml-auto">
+        <a href="/Mine/ImprimirOs/@Model.Os.Id" target="_blank" class="btn-secondary btn-sm">
+            <i class='bx bx-printer'></i> Imprimir
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+        <div class="card">
+            <div class="card-header"><h2 class="font-semibold text-gray-800">Detalhes</h2></div>
+            <div class="card-body">
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <dt class="text-xs text-gray-500 uppercase">Status</dt>
+                        <dd class="mt-1 font-semibold">@Model.Os.Status</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500 uppercase">Data</dt>
+                        <dd class="mt-1 font-semibold">@Model.Os.DataInicial?.ToString("dd/MM/yyyy")</dd>
+                    </div>
+                    @if (Model.Os.DataFinal.HasValue)
+                    {
+                        <div>
+                            <dt class="text-xs text-gray-500 uppercase">Conclusão</dt>
+                            <dd class="mt-1">@Model.Os.DataFinal.Value.ToString("dd/MM/yyyy")</dd>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Os.Garantia))
+                    {
+                        <div>
+                            <dt class="text-xs text-gray-500 uppercase">Garantia</dt>
+                            <dd class="mt-1">@Model.Os.Garantia</dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Os.Defeito))
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Defeito Declarado</h2></div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-700 whitespace-pre-wrap">@Model.Os.Defeito</p>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Os.LaudoTecnico))
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Laudo Técnico</h2></div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-700 whitespace-pre-wrap">@Model.Os.LaudoTecnico</p>
+                </div>
+            </div>
+        }
+
+        @if (Model.Os.ProdutosOs.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Peças</h2></div>
+                <div class="card-body p-0">
+                    <table class="table-mapos">
+                        <thead>
+                            <tr><th>Descrição</th><th>Qtd</th><th>Preço</th><th>SubTotal</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.Os.ProdutosOs)
+                            {
+                                <tr>
+                                    <td class="text-sm">@p.Descricao</td>
+                                    <td class="text-sm">@p.Quantidade</td>
+                                    <td class="text-sm">@p.Preco.ToString("C", ptBR)</td>
+                                    <td class="text-sm font-medium">@p.SubTotal.ToString("C", ptBR)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (Model.Os.ServicosOs.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Serviços</h2></div>
+                <div class="card-body p-0">
+                    <table class="table-mapos">
+                        <thead>
+                            <tr><th>Serviço</th><th>Qtd</th><th>Preço</th><th>SubTotal</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.Os.ServicosOs)
+                            {
+                                <tr>
+                                    <td class="text-sm">@s.Servico</td>
+                                    <td class="text-sm">@s.Quantidade</td>
+                                    <td class="text-sm">@s.Preco.ToString("C", ptBR)</td>
+                                    <td class="text-sm font-medium">@s.SubTotal.ToString("C", ptBR)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="space-y-6">
+        <div class="card">
+            <div class="card-header"><h2 class="font-semibold text-gray-800">Totais</h2></div>
+            <div class="card-body text-sm space-y-2">
+                @if (Model.Os.Desconto > 0)
+                {
+                    <div class="flex justify-between text-gray-600">
+                        <span>Desconto</span>
+                        <span>-@Model.Os.ValorDesconto.ToString("C", ptBR)</span>
+                    </div>
+                }
+                <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
+                    <span>Total</span>
+                    <span class="text-primary-700">@Model.Os.ValorTotal.ToString("C", ptBR)</span>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Os.EquipamentosOs.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Equipamentos</h2></div>
+                <div class="card-body text-sm space-y-3">
+                    @foreach (var eq in Model.Os.EquipamentosOs)
+                    {
+                        <div>
+                            <p class="font-medium">@(eq.Equipamento?.Nome ?? "—")</p>
+                            @if (!string.IsNullOrWhiteSpace(eq.DefeitoDeclarado))
+                            {
+                                <p class="text-gray-500 text-xs">Defeito: @eq.DefeitoDeclarado</p>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.Os.Anotacoes.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Anotações</h2></div>
+                <div class="card-body text-sm space-y-2">
+                    @foreach (var a in Model.Os.Anotacoes.OrderByDescending(x => x.DataHora))
+                    {
+                        <div class="border-l-2 border-gray-200 pl-3">
+                            <p class="text-gray-700">@a.Anotacao</p>
+                            <p class="text-xs text-gray-400 mt-0.5">@a.DataHora.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

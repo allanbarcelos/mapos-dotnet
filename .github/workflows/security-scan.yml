@@ -1,0 +1,84 @@
+name: Weekly Security Scan
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # every Monday at 08:00 UTC
+  workflow_dispatch:       # allow manual trigger from GitHub UI
+
+permissions:
+  contents: read
+  issues: write            # needed to open an issue on finding CVEs
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore packages
+        run: dotnet restore dotnet-razor.csproj
+
+      - name: Scan for vulnerable packages
+        id: scan
+        run: |
+          OUTPUT=$(dotnet list dotnet-razor.csproj package --vulnerable --include-transitive 2>&1)
+          echo "$OUTPUT"
+          echo "output<<EOF" >> $GITHUB_OUTPUT
+          echo "$OUTPUT"    >> $GITHUB_OUTPUT
+          echo "EOF"        >> $GITHUB_OUTPUT
+
+          if echo "$OUTPUT" | grep -q "has the following vulnerable packages"; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+            echo "✅ No known vulnerabilities found."
+          fi
+
+      - name: Open GitHub issue if vulnerabilities found
+        if: steps.scan.outputs.found == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.scan.outputs.output }}`;
+            const title  = `[Security] Vulnerable NuGet packages detected`;
+            const body   = [
+              `## Vulnerable packages detected`,
+              ``,
+              `The weekly dependency scan found packages with known CVEs.`,
+              ``,
+              `\`\`\``,
+              output,
+              `\`\`\``,
+              ``,
+              `**Action required:** update the affected packages and re-run the scan.`,
+              ``,
+              `\`\`\`bash`,
+              `dotnet list package --vulnerable --include-transitive`,
+              `\`\`\``,
+            ].join('\n');
+
+            // Check if an open issue with the same title already exists
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'security',
+            });
+
+            const already = existing.data.find(i => i.title === title);
+            if (already) {
+              console.log(`Issue already open: #${already.number}`);
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner:  context.repo.owner,
+              repo:   context.repo.repo,
+              title,
+              body,
+              labels: ['security'],
+            });

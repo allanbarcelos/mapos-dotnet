@@ -1,0 +1,127 @@
+@page
+@model mapos_dotnet.Pages.Mine.CadastrarModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal do Cliente — Cadastro</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+</head>
+<body class="antialiased bg-gray-50 min-h-screen py-10">
+
+<div class="w-full max-w-xl mx-auto px-4">
+    <div class="text-center mb-8">
+        <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class='bx bx-user-plus text-white text-3xl'></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Criar Conta</h1>
+        <p class="text-sm text-gray-500 mt-1">Cadastre-se para acompanhar seus pedidos</p>
+    </div>
+
+    @if (TempData["Error"] is string err)
+    {
+        <div class="mb-4 flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            <i class='bx bx-error-circle'></i> @err
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+
+                <h3 class="font-semibold text-gray-700 border-b pb-2">Dados de acesso</h3>
+
+                <div>
+                    <label asp-for="Input.NomeCliente" class="form-label">Nome completo <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.NomeCliente" class="form-input" autofocus />
+                    <span asp-validation-for="Input.NomeCliente" class="form-error"></span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.Email" class="form-label">E-mail <span class="text-red-500">*</span></label>
+                        <input asp-for="Input.Email" type="email" class="form-input" />
+                        <span asp-validation-for="Input.Email" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.Documento" class="form-label">CPF / CNPJ</label>
+                        <input asp-for="Input.Documento" class="form-input" placeholder="000.000.000-00" />
+                        <span asp-validation-for="Input.Documento" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.Senha" class="form-label">Senha <span class="text-red-500">*</span></label>
+                        <input asp-for="Input.Senha" type="password" class="form-input" />
+                        <span asp-validation-for="Input.Senha" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.ConfirmarSenha" class="form-label">Confirmar senha <span class="text-red-500">*</span></label>
+                        <input asp-for="Input.ConfirmarSenha" type="password" class="form-input" />
+                        <span asp-validation-for="Input.ConfirmarSenha" class="form-error"></span>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-700 border-b pb-2 pt-2">Contato</h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Input.Telefone" class="form-label">Telefone</label>
+                        <input asp-for="Input.Telefone" class="form-input" placeholder="(00) 0000-0000" />
+                        <span asp-validation-for="Input.Telefone" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.Celular" class="form-label">Celular</label>
+                        <input asp-for="Input.Celular" class="form-input" placeholder="(00) 00000-0000" />
+                        <span asp-validation-for="Input.Celular" class="form-error"></span>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-700 border-b pb-2 pt-2">Endereço (opcional)</h3>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <label asp-for="Input.Rua" class="form-label">Rua</label>
+                        <input asp-for="Input.Rua" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Numero" class="form-label">Número</label>
+                        <input asp-for="Input.Numero" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="Input.Bairro" class="form-label">Bairro</label>
+                        <input asp-for="Input.Bairro" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Cidade" class="form-label">Cidade</label>
+                        <input asp-for="Input.Cidade" class="form-input" />
+                    </div>
+                    <div>
+                        <label asp-for="Input.Estado" class="form-label">UF</label>
+                        <input asp-for="Input.Estado" class="form-input" maxlength="2" placeholder="SP" />
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <a href="/Mine/Login" class="btn-secondary flex-1 justify-center">Já tenho conta</a>
+                    <button type="submit" class="btn-primary flex-1 justify-center">
+                        <i class='bx bx-user-check mr-2'></i> Cadastrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

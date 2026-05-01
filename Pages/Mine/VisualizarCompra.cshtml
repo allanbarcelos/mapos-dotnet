@@ -1,0 +1,87 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Mine.VisualizarCompraModel
+@{
+    ViewData["Title"] = $"Compra #{Model.Venda.Id}";
+    var ptBR = new System.Globalization.CultureInfo("pt-BR");
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Mine/Compras" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Compra #@Model.Venda.Id</h1>
+        <p class="text-sm text-gray-500 mt-0.5">@Model.Venda.DataVenda.ToString("dd/MM/yyyy")</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="card">
+            <div class="card-header"><h2 class="font-semibold text-gray-800">Detalhes</h2></div>
+            <div class="card-body">
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <dt class="text-xs text-gray-500 uppercase">Status</dt>
+                        <dd class="mt-1 font-semibold">@(Model.Venda.Status ?? "—")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-gray-500 uppercase">Data</dt>
+                        <dd class="mt-1 font-semibold">@Model.Venda.DataVenda.ToString("dd/MM/yyyy")</dd>
+                    </div>
+                </dl>
+                @if (!string.IsNullOrWhiteSpace(Model.Venda.Observacoes))
+                {
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase mb-1">Observações</p>
+                        <p class="text-sm text-gray-700 whitespace-pre-wrap">@Model.Venda.Observacoes</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (Model.Venda.Itens.Any())
+        {
+            <div class="card">
+                <div class="card-header"><h2 class="font-semibold text-gray-800">Produtos</h2></div>
+                <div class="card-body p-0">
+                    <table class="table-mapos">
+                        <thead>
+                            <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>SubTotal</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Venda.Itens)
+                            {
+                                <tr>
+                                    <td class="text-sm">@(item.Produto?.Descricao ?? "—")</td>
+                                    <td class="text-sm">@item.Quantidade</td>
+                                    <td class="text-sm">@item.Preco.ToString("C", ptBR)</td>
+                                    <td class="text-sm font-medium">@item.SubTotal.ToString("C", ptBR)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="space-y-6">
+        <div class="card">
+            <div class="card-header"><h2 class="font-semibold text-gray-800">Totais</h2></div>
+            <div class="card-body text-sm space-y-2">
+                @if (Model.Venda.Desconto > 0)
+                {
+                    <div class="flex justify-between text-gray-600">
+                        <span>Desconto</span>
+                        <span>-@Model.Venda.ValorDesconto.ToString("C", ptBR)</span>
+                    </div>
+                }
+                <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-200">
+                    <span>Total</span>
+                    <span class="text-primary-700">@Model.Venda.ValorTotal.ToString("C", ptBR)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

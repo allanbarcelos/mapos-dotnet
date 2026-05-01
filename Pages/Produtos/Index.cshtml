@@ -1,0 +1,137 @@
+@page
+@model mapos_dotnet.Pages.Produtos.IndexModel
+@{
+    ViewData["Title"] = "Produtos";
+    var baseUrl = "/Produtos?q=" + Uri.EscapeDataString(Model.Q ?? "");
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Produtos</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Gerencie o catálogo de produtos</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Produtos/Adicionar" class="btn-primary">
+            <i class='bx bx-plus'></i>
+            Novo Produto
+        </a>
+    }
+</div>
+
+<!-- Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-48">
+                <label class="form-label">Buscar</label>
+                <input type="search" name="q" value="@Model.Q" placeholder="Descrição ou código de barras..."
+                       class="form-input" />
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class='bx bx-search'></i>
+                Filtrar
+            </button>
+            @if (!string.IsNullOrEmpty(Model.Q))
+            {
+                <a href="/Produtos" class="btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Limpar
+                </a>
+            }
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Produtos.Count == 0)
+        {
+            <div class="py-16 text-center text-gray-400">
+                <i class='bx bx-package text-5xl mb-3 block'></i>
+                <p class="text-lg font-medium">Nenhum produto encontrado</p>
+                <p class="text-sm mt-1">Tente ajustar os filtros ou cadastre um novo produto.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table-mapos">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Código de Barras</th>
+                        <th>Descrição</th>
+                        <th>Unidade</th>
+                        <th class="text-right">Preço Compra</th>
+                        <th class="text-right">Preço Venda</th>
+                        <th class="text-right">Estoque</th>
+                        <th class="text-right">Estoque Mín.</th>
+                        <th>Categoria</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var produto in Model.Produtos)
+                    {
+                        var estoqueBaixo = produto.Estoque <= produto.EstoqueMinimo;
+                        <tr>
+                            <td class="text-gray-400 text-sm">@produto.Id</td>
+                            <td class="font-mono text-sm text-gray-600">
+                                @(produto.CodDeBarra ?? "—")
+                            </td>
+                            <td class="font-medium">@produto.Descricao</td>
+                            <td class="text-gray-600">@(produto.Unidade ?? "—")</td>
+                            <td class="text-right text-gray-600">R$ @produto.PrecoCompra.ToString("N2")</td>
+                            <td class="text-right font-medium">R$ @produto.PrecoVenda.ToString("N2")</td>
+                            <td class="text-right">
+                                @if (estoqueBaixo)
+                                {
+                                    <span class="badge badge-red">@produto.Estoque</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-700">@produto.Estoque</span>
+                                }
+                            </td>
+                            <td class="text-right text-gray-600">@produto.EstoqueMinimo</td>
+                            <td>
+                                @if (produto.Categoria is not null)
+                                {
+                                    <span class="badge badge-gray">@produto.Categoria.Nome</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-300">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/Produtos/Visualizar/@produto.Id" class="btn-secondary btn-sm">
+                                        <i class='bx bx-show'></i>
+                                    </a>
+                                    <a href="/Produtos/Editar/@produto.Id" class="btn-secondary btn-sm">
+                                        <i class='bx bx-edit'></i>
+                                        Editar
+                                    </a>
+                                    <form method="post" asp-page-handler="Excluir" asp-route-id="@produto.Id"
+                                          onsubmit="return confirm('Tem certeza que deseja excluir o produto @Html.Raw(produto.Descricao.Replace("'", "\\'"))?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-danger btn-sm">
+                                            <i class='bx bx-trash'></i>
+                                            Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="px-4 py-3 border-t border-gray-100">
+                @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, baseUrl))
+            </div>
+        }
+    </div>
+</div>

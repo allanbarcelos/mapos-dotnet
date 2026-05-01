@@ -1,0 +1,112 @@
+@page
+@model mapos_dotnet.Pages.Mine.IndexModel
+@{
+    ViewData["Title"] = "Painel";
+}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Bem-vindo, @Model.ClienteNome</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Acompanhe seus pedidos e compras</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    <a href="/Mine/Os" class="card hover:shadow-md transition-shadow">
+        <div class="card-body flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class='bx bx-file text-blue-600 text-2xl'></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Ordens de Serviço</p>
+                <p class="text-xl font-bold text-gray-900">@Model.OsRecentes.Count</p>
+            </div>
+        </div>
+    </a>
+    <a href="/Mine/Compras" class="card hover:shadow-md transition-shadow">
+        <div class="card-body flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class='bx bx-cart text-green-600 text-2xl'></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Compras</p>
+                <p class="text-xl font-bold text-gray-900">@Model.Compras.Count</p>
+            </div>
+        </div>
+    </a>
+    <a href="/Mine/Cobrancas" class="card hover:shadow-md transition-shadow">
+        <div class="card-body flex items-center gap-4">
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <i class='bx bx-dollar-circle text-yellow-600 text-2xl'></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Cobranças</p>
+                <p class="text-xl font-bold text-gray-900">—</p>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card">
+        <div class="card-header flex items-center justify-between">
+            <h2 class="font-semibold text-gray-800">Últimas Ordens de Serviço</h2>
+            <a href="/Mine/Os" class="text-sm text-primary-600 hover:underline">Ver todas</a>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.OsRecentes.Any())
+            {
+                <p class="text-center py-8 text-gray-400 text-sm">Nenhuma OS encontrada.</p>
+            }
+            else
+            {
+                <table class="table-mapos">
+                    <thead>
+                        <tr><th>#</th><th>Data</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var os in Model.OsRecentes)
+                        {
+                            <tr>
+                                <td><a href="/Mine/VisualizarOs/@os.Id" class="text-primary-600 hover:underline font-medium">#@os.Id</a></td>
+                                <td class="text-xs text-gray-500">@os.DataInicial?.ToString("dd/MM/yyyy")</td>
+                                <td><span class="text-xs font-medium">@os.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header flex items-center justify-between">
+            <h2 class="font-semibold text-gray-800">Últimas Compras</h2>
+            <a href="/Mine/Compras" class="text-sm text-primary-600 hover:underline">Ver todas</a>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Compras.Any())
+            {
+                <p class="text-center py-8 text-gray-400 text-sm">Nenhuma compra encontrada.</p>
+            }
+            else
+            {
+                var ptBR = new System.Globalization.CultureInfo("pt-BR");
+                <table class="table-mapos">
+                    <thead>
+                        <tr><th>#</th><th>Data</th><th>Total</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var v in Model.Compras)
+                        {
+                            <tr>
+                                <td><a href="/Mine/VisualizarCompra/@v.Id" class="text-primary-600 hover:underline font-medium">#@v.Id</a></td>
+                                <td class="text-xs text-gray-500">@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                                <td class="text-sm font-medium">@v.ValorTotal.ToString("C", ptBR)</td>
+                                <td><span class="text-xs font-medium">@(v.Status ?? "—")</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

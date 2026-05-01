@@ -1,0 +1,126 @@
+@page
+@model mapos_dotnet.Pages.Usuarios.IndexModel
+@{
+    ViewData["Title"] = "Usuários";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Usuários</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Gerencie os usuários do sistema</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Usuarios/Adicionar" class="btn-primary">
+            <i class='bx bx-plus'></i>
+            Novo Usuário
+        </a>
+    }
+</div>
+
+@await Html.PartialAsync("_Alerts")
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Usuarios.Count == 0)
+        {
+            <div class="py-16 text-center text-gray-400">
+                <i class='bx bx-user-x text-5xl mb-3 block'></i>
+                <p class="text-lg font-medium">Nenhum usuário cadastrado</p>
+                <p class="text-sm mt-1">Clique em "Novo Usuário" para começar.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table-mapos">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>CPF</th>
+                        <th>Permissão</th>
+                        <th>Situação</th>
+                        <th>Expiração</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model.Usuarios)
+                    {
+                        <tr>
+                            <td class="text-gray-400 text-sm">@usuario.Id</td>
+                            <td class="font-medium">
+                                <div class="flex items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(usuario.UrlImageUser))
+                                    {
+                                        <img src="@usuario.UrlImageUser" alt="@usuario.Nome"
+                                             class="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                            @usuario.Nome[0].ToString().ToUpper()
+                                        </div>
+                                    }
+                                    @usuario.Nome
+                                </div>
+                            </td>
+                            <td class="text-gray-600">@usuario.Email</td>
+                            <td class="text-gray-600">
+                                @if (!string.IsNullOrEmpty(usuario.Cpf))
+                                {
+                                    @usuario.Cpf
+                                }
+                                else
+                                {
+                                    <span class="text-gray-300">—</span>
+                                }
+                            </td>
+                            <td class="text-gray-600">@usuario.Permissao?.Nome</td>
+                            <td>
+                                @if (usuario.Situacao)
+                                {
+                                    <span class="badge-green">Ativo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-red">Inativo</span>
+                                }
+                            </td>
+                            <td class="text-gray-600">
+                                @if (usuario.DataExpiracao.HasValue)
+                                {
+                                    var expired = usuario.DataExpiracao.Value < DateOnly.FromDateTime(DateTime.Today);
+                                    <span class="@(expired ? "text-red-600 font-medium" : "")">
+                                        @usuario.DataExpiracao.Value.ToString("dd/MM/yyyy")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-300">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/Usuarios/Editar/@usuario.Id" class="btn-secondary btn-sm">
+                                        <i class='bx bx-edit'></i>
+                                        Editar
+                                    </a>
+                                    <form method="post" asp-page-handler="ToggleSituacao" asp-route-id="@usuario.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="@(usuario.Situacao ? "btn-danger" : "btn-secondary") btn-sm">
+                                            <i class='bx @(usuario.Situacao ? "bx-lock" : "bx-lock-open")'></i>
+                                            @(usuario.Situacao ? "Desativar" : "Ativar")
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

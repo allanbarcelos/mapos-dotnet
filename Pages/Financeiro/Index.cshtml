@@ -1,0 +1,98 @@
+@page
+@model mapos_dotnet.Pages.Financeiro.IndexModel
+@{
+    ViewData["Title"] = "Financeiro";
+    var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Financeiro</h1>
+    <div class="flex gap-2">
+        <a href="/Financeiro/AdicionarReceita" class="btn-success btn-sm"><i class='bx bx-plus'></i> Receita</a>
+        <a href="/Financeiro/AdicionarDespesa" class="btn-danger btn-sm"><i class='bx bx-minus'></i> Despesa</a>
+        <a href="/Financeiro/Parcelar" class="btn-secondary btn-sm"><i class='bx bx-calendar'></i> Parcelar</a>
+        <a href="/Financeiro/Lancamentos" class="btn-secondary btn-sm">Ver todos</a>
+    </div>
+</div>
+
+<!-- Filtro mês/ano -->
+<form method="get" class="flex gap-3 items-end mb-6">
+    <div>
+        <label class="form-label text-xs">Mês</label>
+        <select name="mes" class="form-select w-32">
+            @for (int m = 1; m <= 12; m++) {
+                var monthLabel = new DateTime(2000, m, 1).ToString("MMMM", ptBR);
+                if (m == Model.Mes) { <option value="@m" selected>@monthLabel</option> }
+                else { <option value="@m">@monthLabel</option> }
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label text-xs">Ano</label>
+        <input type="number" name="ano" value="@Model.Ano" class="form-input w-24" min="2000" max="2099" />
+    </div>
+    <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+</form>
+
+<!-- Cards resumo -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 mb-1">Receitas</p>
+        <p class="text-xl font-bold text-green-600">@Model.TotalReceitas.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 mb-1">Despesas</p>
+        <p class="text-xl font-bold text-red-600">@Model.TotalDespesas.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 mb-1">Saldo</p>
+        <p class="text-xl font-bold @(Model.Saldo >= 0 ? "text-green-600" : "text-red-600")">@Model.Saldo.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 mb-1">A Receber</p>
+        <p class="text-xl font-bold text-blue-600">@Model.AReceber.ToString("C", ptBR)</p>
+    </div>
+    <div class="card card-body text-center">
+        <p class="text-xs text-gray-500 mb-1">A Pagar</p>
+        <p class="text-xl font-bold text-orange-600">@Model.APagar.ToString("C", ptBR)</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Contas -->
+    <div class="card">
+        <div class="card-header"><h3 class="font-semibold">Contas Bancárias</h3></div>
+        <table class="table-mapos">
+            <thead><tr><th>Conta</th><th>Banco</th><th class="text-right">Saldo</th></tr></thead>
+            <tbody>
+            @foreach (var c in Model.Contas) {
+                <tr>
+                    <td>@c.Nome</td>
+                    <td class="text-gray-500 text-xs">@(c.Banco ?? "-")</td>
+                    <td class="text-right font-medium @(c.Saldo >= 0 ? "text-green-600" : "text-red-600")">@c.Saldo.ToString("C", ptBR)</td>
+                </tr>
+            }
+            @if (!Model.Contas.Any()) { <tr><td colspan="3" class="text-center text-gray-400 py-3">Nenhuma conta</td></tr> }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Lançamentos recentes -->
+    <div class="lg:col-span-2 card">
+        <div class="card-header"><h3 class="font-semibold">Lançamentos Recentes</h3></div>
+        <table class="table-mapos">
+            <thead><tr><th>Descrição</th><th>Tipo</th><th>Vencimento</th><th class="text-right">Valor</th><th>Situação</th></tr></thead>
+            <tbody>
+            @foreach (var l in Model.Recentes) {
+                <tr>
+                    <td>@l.Descricao</td>
+                    <td><span class="@(l.Tipo == "receita" ? "badge-green" : "badge-red")">@l.Tipo</span></td>
+                    <td class="text-xs">@l.DataVencimento.ToString("dd/MM/yyyy")</td>
+                    <td class="text-right font-medium">@l.ValorDesconto.ToString("N2")</td>
+                    <td><span class="@(l.Baixado ? "badge-green" : "badge-yellow")">@(l.Baixado ? "Pago" : "Pendente")</span></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

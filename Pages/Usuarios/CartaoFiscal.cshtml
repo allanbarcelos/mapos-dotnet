@@ -1,0 +1,185 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Usuarios.CartaoFiscalModel
+@{
+    Layout = null;
+    var u = Model.Usuario;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>Cartão Fiscal PDV — @u.Nome</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #e5e7eb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            gap: 24px;
+            padding: 32px;
+        }
+
+        /* Card: ISO/IEC 7810 ID-1 = 85.6mm × 54mm */
+        .card-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .card {
+            width: 85.6mm;
+            height: 54mm;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1d4ed8 100%);
+            border-radius: 8px;
+            padding: 6mm 7mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px rgba(0,0,0,.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -20mm; right: -10mm;
+            width: 50mm; height: 50mm;
+            border-radius: 50%;
+            background: rgba(59,130,246,.15);
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-brand {
+            font-size: 7pt;
+            font-weight: 700;
+            color: #93c5fd;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .card-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 6pt;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: .5px;
+        }
+        .card-name {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: .3px;
+        }
+        .card-sub {
+            font-size: 6pt;
+            color: #94a3b8;
+            margin-top: 1px;
+        }
+        .card-barcode-wrap {
+            background: #fff;
+            border-radius: 4px;
+            padding: 4px 6px 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card-barcode-wrap svg {
+            max-width: 100%;
+            height: 14mm;
+        }
+        .card-code-text {
+            font-family: monospace;
+            font-size: 5pt;
+            color: #374151;
+            margin-top: 1px;
+            letter-spacing: .5px;
+        }
+
+        /* No-print toolbar */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            no-print: block;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-print  { background: #1d4ed8; color: #fff; }
+        .btn-back   { background: #374151; color: #fff; }
+
+        @@media print {
+            body { background: #fff; padding: 0; }
+            .toolbar { display: none; }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <button class="btn btn-print" onclick="window.print()">🖨 Imprimir Cartão</button>
+    <a class="btn btn-back" href="/Usuarios/Editar/@u.Id">← Voltar</a>
+</div>
+
+<div class="card-wrap">
+    <div class="card" id="fiscal-card">
+        <div class="card-top">
+            <div>
+                <div class="card-brand">@Model.AppName</div>
+                <div style="font-size:5pt;color:#64748b;margin-top:1px">SISTEMA DE GESTÃO</div>
+            </div>
+            <div class="card-badge">FISCAL PDV</div>
+        </div>
+
+        <div>
+            <div class="card-name">@u.Nome.ToUpperInvariant()</div>
+            <div class="card-sub">Operador Fiscal &nbsp;·&nbsp; ID #@u.Id</div>
+        </div>
+
+        <div class="card-barcode-wrap">
+            <svg id="barcode"></svg>
+            <div class="card-code-text">@Model.CodigoParaExibir</div>
+        </div>
+    </div>
+
+    @if (Model.CodigoLegado)
+    {
+        <p style="font-size:11px;color:#d97706;text-align:center;max-width:85.6mm">
+            ⚠️ Cartão gerado antes da proteção de dados. Edite o usuário e salve novamente para atualizar.
+        </p>
+    }
+    <p style="font-size:11px;color:#6b7280;text-align:center">
+        Este cartão é pessoal e intransferível. Guarde em local seguro.
+    </p>
+</div>
+
+<script>
+    JsBarcode("#barcode", "@Model.CodigoParaExibir", {
+        format: "CODE128",
+        lineColor: "#111827",
+        width: 1.4,
+        height: 40,
+        displayValue: false,
+        margin: 0,
+    });
+</script>
+</body>
+</html>

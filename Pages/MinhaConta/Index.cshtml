@@ -1,0 +1,38 @@
+@page
+@model mapos_dotnet.Pages.MinhaConta.IndexModel
+@{ ViewData["Title"] = "Minha Conta"; }
+
+<h1 class="text-2xl font-bold text-gray-900 mb-6">Minha Conta</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl">
+    <!-- Dados -->
+    <div class="card card-body">
+        <h2 class="font-semibold mb-4">Dados do Perfil</h2>
+        @if (Model.Usuario is not null) {
+        <dl class="space-y-2 text-sm">
+            <div class="flex gap-3"><dt class="text-gray-500 w-24">Nome</dt><dd class="font-medium">@Model.Usuario.Nome</dd></div>
+            <div class="flex gap-3"><dt class="text-gray-500 w-24">E-mail</dt><dd>@Model.Usuario.Email</dd></div>
+            <div class="flex gap-3"><dt class="text-gray-500 w-24">CPF</dt><dd>@(Model.Usuario.Cpf ?? "-")</dd></div>
+            <div class="flex gap-3"><dt class="text-gray-500 w-24">Telefone</dt><dd>@(Model.Usuario.Telefone ?? "-")</dd></div>
+            <div class="flex gap-3"><dt class="text-gray-500 w-24">Celular</dt><dd>@(Model.Usuario.Celular ?? "-")</dd></div>
+        </dl>
+        <a href="/Usuarios/Editar/@Model.Usuario.Id" class="btn-secondary btn-sm mt-4 inline-flex">
+            <i class='bx bx-edit'></i> Editar dados
+        </a>
+        }
+    </div>
+
+    <!-- Alterar senha -->
+    <div class="card card-body">
+        <h2 class="font-semibold mb-4">Alterar Senha</h2>
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <div class="space-y-4">
+                <div><label asp-for="Senha.Atual" class="form-label">Senha Atual</label><input asp-for="Senha.Atual" type="password" class="form-input" /><span asp-validation-for="Senha.Atual" class="form-error"></span></div>
+                <div><label asp-for="Senha.Nova" class="form-label">Nova Senha</label><input asp-for="Senha.Nova" type="password" class="form-input" /><span asp-validation-for="Senha.Nova" class="form-error"></span></div>
+                <div><label asp-for="Senha.Confirmar" class="form-label">Confirmar Senha</label><input asp-for="Senha.Confirmar" type="password" class="form-input" /><span asp-validation-for="Senha.Confirmar" class="form-error"></span></div>
+            </div>
+            <button type="submit" class="btn-primary mt-6"><i class='bx bx-lock'></i> Alterar Senha</button>
+        </form>
+    </div>
+</div>

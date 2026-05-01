@@ -1,0 +1,76 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.VendasModel
+@{ ViewData["Title"] = "Relatório de Vendas"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório de Vendas</h1>
+    <a href="?handler=Exportar&q=@Model.Q&status=@Model.Status&de=@Model.De&ate=@Model.Ate" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-40">
+                <label class="form-label">Buscar cliente</label>
+                <input type="search" name="q" value="@Model.Q" class="form-input" placeholder="Nome do cliente..." />
+            </div>
+            <div>
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    @foreach (var s in new[] { "Aberto", "Concluído", "Cancelado" })
+                    {
+                        if (s == Model.Status) { <option selected>@s</option> }
+                        else { <option>@s</option> }
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label">De</label>
+                <input type="date" name="de" value="@Model.De" class="form-input" />
+            </div>
+            <div>
+                <label class="form-label">Até</label>
+                <input type="date" name="ate" value="@Model.Ate" class="form-input" />
+            </div>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-3 print:hidden">
+    <div class="card-body py-3 flex gap-8 text-sm">
+        <span>Total de vendas: <strong>@Model.Items.Count</strong></span>
+        <span>Valor total: <strong class="text-primary-600">@Model.TotalGeral.ToString("C", ptBR)</strong></span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr><th>#</th><th>Cliente</th><th>Status</th><th>Data</th><th>Faturado</th><th class="text-right">Total</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var v in Model.Items)
+            {
+                <tr>
+                    <td><a href="/Vendas/Visualizar/@v.Id" class="text-primary-600 hover:underline print:text-black">@v.Id</a></td>
+                    <td class="text-sm">@v.Cliente.NomeCliente</td>
+                    <td><span class="badge-gray text-xs">@v.Status</span></td>
+                    <td class="text-xs text-gray-500">@v.DataVenda.ToString("dd/MM/yyyy")</td>
+                    <td class="text-xs">@(v.Faturado ? "✓" : "-")</td>
+                    <td class="text-right font-medium text-sm">@v.ValorTotal.ToString("C", ptBR)</td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="6" class="text-center py-8 text-gray-400">Nenhuma venda encontrada</td></tr> }
+            </tbody>
+            <tfoot>
+                <tr class="font-semibold bg-gray-50">
+                    <td colspan="5" class="text-right text-sm">Total</td>
+                    <td class="text-right">@Model.TotalGeral.ToString("C", ptBR)</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

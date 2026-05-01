@@ -1,0 +1,20 @@
+@page
+@model mapos_dotnet.Pages.Arquivos.AdicionarModel
+@{ ViewData["Title"] = "Upload de Arquivo"; }
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Arquivos" class="text-gray-400 hover:text-gray-600"><i class='bx bx-arrow-back text-xl'></i></a>
+    <h1 class="text-2xl font-bold text-gray-900">Upload de Arquivo</h1>
+</div>
+<div class="card max-w-lg card-body">
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="space-y-4">
+            <div><label asp-for="Input.Nome" class="form-label">Nome <span class="text-red-500">*</span></label><input asp-for="Input.Nome" class="form-input" /></div>
+            <div><label asp-for="Input.Descricao" class="form-label">Descrição</label><textarea asp-for="Input.Descricao" rows="3" class="form-input"></textarea></div>
+            <div><label asp-for="Input.Categoria" class="form-label">Categoria</label><input asp-for="Input.Categoria" class="form-input" /></div>
+            <div><label class="form-label">Arquivo</label><input type="file" name="file" class="form-input" /></div>
+        </div>
+        <div class="flex gap-3 mt-6"><button type="submit" class="btn-primary"><i class='bx bx-upload'></i> Enviar</button><a href="/Arquivos" class="btn-secondary">Cancelar</a></div>
+    </form>
+</div>

@@ -1,0 +1,73 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.ClientesModel
+@{ ViewData["Title"] = "Relatório de Clientes"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório de Clientes</h1>
+    <a href="?handler=Exportar&q=@Model.Q&tipo=@Model.Tipo" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-40">
+                <label class="form-label">Buscar</label>
+                <input type="search" name="q" value="@Model.Q" class="form-input" placeholder="Nome ou documento..." />
+            </div>
+            <div>
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-select">
+                    @foreach (var (val, label) in new[] { ("todos","Todos"), ("cliente","Clientes"), ("fornecedor","Fornecedores") })
+                    {
+                        if (val == Model.Tipo) { <option value="@val" selected>@label</option> }
+                        else { <option value="@val">@label</option> }
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th><th>Nome</th><th>Documento</th><th>Cidade/UF</th>
+                    <th class="text-right">OS</th><th class="text-right">Vendas</th>
+                    <th class="text-right">Total OS</th><th class="text-right">Total Vendas</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model.Items)
+            {
+                <tr>
+                    <td class="text-gray-400 text-xs">@row.Cliente.Id</td>
+                    <td class="font-medium text-sm">
+                        <a href="/Clientes/Visualizar/@row.Cliente.Id" class="hover:underline text-primary-600 print:text-black print:no-underline">
+                            @row.Cliente.NomeCliente
+                        </a>
+                    </td>
+                    <td class="text-xs text-gray-500">@(row.Cliente.Documento ?? "-")</td>
+                    <td class="text-xs text-gray-500">@(row.Cliente.Cidade)@(row.Cliente.Estado is not null ? $"/{row.Cliente.Estado}" : "")</td>
+                    <td class="text-right text-sm">@row.TotalOs</td>
+                    <td class="text-right text-sm">@row.TotalVendas</td>
+                    <td class="text-right text-sm">@row.ValorOs.ToString("C", ptBR)</td>
+                    <td class="text-right text-sm font-medium">@row.ValorVendas.ToString("C", ptBR)</td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="8" class="text-center py-8 text-gray-400">Nenhum resultado</td></tr> }
+            </tbody>
+            <tfoot>
+                <tr class="font-semibold bg-gray-50">
+                    <td colspan="4" class="text-right text-sm">Total (@Model.Items.Count)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.TotalOs)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.TotalVendas)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.ValorOs).ToString("C", ptBR)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.ValorVendas).ToString("C", ptBR)</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,216 @@
+@page
+@model mapos_dotnet.Pages.Pdv.PainelModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Painel PDV";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Painel PDV</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Monitoramento em tempo real dos terminais</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="/Pdv/Historico" class="btn-secondary">
+            <i class='bx bx-history'></i>
+            <span>Histórico</span>
+        </a>
+        <a href="/Pdv/Terminais" class="btn-secondary">
+            <i class='bx bx-cog'></i>
+            <span>Gerenciar Terminais</span>
+        </a>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Alerts")
+
+<!-- Resumo do dia -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="card">
+        <div class="card-body py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Ativos agora</p>
+            <p class="text-3xl font-bold text-green-600">@Model.TotalAbertos</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Pausados</p>
+            <p class="text-3xl font-bold text-amber-500">@Model.TotalPausados</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Disponíveis</p>
+            <p class="text-3xl font-bold text-gray-400">@Model.TotalDisponiveis</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Vendas PDV hoje</p>
+            <p class="text-3xl font-bold text-primary-600">R$ @Model.TotalVendasDia.ToString("F2")</p>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Terminais.Any())
+{
+    <div class="card">
+        <div class="card-body text-center py-16 text-gray-400">
+            <i class='bx bx-store text-5xl mb-3'></i>
+            <p class="font-medium">Nenhum terminal cadastrado.</p>
+            <a href="/Pdv/Terminais/Adicionar" class="btn-primary mt-4 inline-flex">
+                <i class='bx bx-plus'></i> Cadastrar Terminal
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="terminais-grid">
+        @foreach (var info in Model.Terminais)
+        {
+            var t = info.Terminal;
+            var s = info.Sessao;
+
+            var (borderColor, headerBg, headerText, dotColor) = t.Status switch
+            {
+                "ocupado"   => ("border-green-200",  "bg-green-50",  "text-green-800",  "bg-green-500"),
+                "pausado"   => ("border-amber-200",  "bg-amber-50",  "text-amber-800",  "bg-amber-400"),
+                _           => ("border-gray-200",   "bg-gray-50",   "text-gray-600",   "bg-gray-300"),
+            };
+
+            var statusLabel = t.Status switch
+            {
+                "ocupado" => "Em uso",
+                "pausado" => "Pausado",
+                _         => "Disponível",
+            };
+
+            <div class="card border @borderColor" data-status="@t.Status"
+                 data-pausa-inicio="@(info.PausaAtiva?.IniciadaEm.ToString("O") ?? "")">
+                <!-- Header -->
+                <div class="px-4 py-3 @headerBg border-b @borderColor flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full @dotColor inline-block flex-shrink-0"></span>
+                        <span class="font-semibold @headerText">@t.Nome</span>
+                    </div>
+                    <span class="text-xs font-medium @headerText">@statusLabel</span>
+                </div>
+
+                <div class="card-body py-4 space-y-3">
+                    @if (!string.IsNullOrEmpty(t.Descricao))
+                    {
+                        <p class="text-xs text-gray-400">@t.Descricao</p>
+                    }
+
+                    @if (t.Status == "disponivel")
+                    {
+                        <div class="flex items-center justify-center py-4 text-gray-300">
+                            <i class='bx bx-power-off text-4xl'></i>
+                        </div>
+                    }
+                    else if (s is not null)
+                    {
+                        <!-- Operador -->
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                <i class='bx bx-user text-primary-600'></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">@s.Operador.Nome</p>
+                                <p class="text-xs text-gray-400">
+                                    Aberto às @s.AbertoEm.ToLocalTime().ToString("HH:mm") —
+                                    <span class="font-medium" id="elapsed-@t.Id"
+                                          data-since="@s.AbertoEm.ToString("O")"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Métricas -->
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
+                                <p class="text-xs text-gray-400">Vendas</p>
+                                <p class="text-xl font-bold text-gray-700">@info.QtdVendas</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg px-3 py-2 text-center">
+                                <p class="text-xs text-gray-400">Total</p>
+                                <p class="text-base font-bold text-green-700">R$ @info.TotalVendas.ToString("F2")</p>
+                            </div>
+                        </div>
+
+                        @if (t.Status == "pausado" && info.PausaAtiva is not null)
+                        {
+                            <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                <i class='bx bx-time text-amber-500'></i>
+                                <div>
+                                    <p class="text-xs font-semibold text-amber-700">Em pausa há
+                                        <span id="pausa-@t.Id"
+                                              data-since="@info.PausaAtiva.IniciadaEm.ToString("O")">—</span>
+                                    </p>
+                                    <p class="text-xs text-amber-600">
+                                        Iniciada às @info.PausaAtiva.IniciadaEm.ToLocalTime().ToString("HH:mm:ss")
+                                    </p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="pt-1">
+                            <a href="/Pdv/Sessao/@s.Id"
+                               class="text-xs text-primary-600 hover:underline flex items-center gap-1">
+                                <i class='bx bx-link-external text-xs'></i>
+                                Ver sessão #@s.Id
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Auto-refresh indicator -->
+    <p class="text-xs text-gray-400 text-right mt-4">
+        <i class='bx bx-refresh'></i>
+        Atualiza automaticamente a cada 30 s —
+        próxima em <span id="countdown">30</span>s
+    </p>
+}
+
+@section Scripts {
+<script>
+// ── Timers em tempo real ─────────────────────────────────────────────────────
+function formatElapsed(sinceIso) {
+    const diff = Math.floor((Date.now() - new Date(sinceIso).getTime()) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    if (h > 0) return `${h}h ${String(m).padStart(2,'0')}m`;
+    if (m > 0) return `${m}m ${String(s).padStart(2,'0')}s`;
+    return `${s}s`;
+}
+
+function updateTimers() {
+    // Tempo de sessão aberta
+    document.querySelectorAll('[id^="elapsed-"]').forEach(el => {
+        const since = el.dataset.since;
+        if (since) el.textContent = formatElapsed(since);
+    });
+    // Tempo de pausa
+    document.querySelectorAll('[id^="pausa-"]').forEach(el => {
+        const since = el.dataset.since;
+        if (since) el.textContent = formatElapsed(since);
+    });
+}
+
+updateTimers();
+setInterval(updateTimers, 1000);
+
+// ── Auto-refresh a cada 30s ──────────────────────────────────────────────────
+let countdown = 30;
+const countdownEl = document.getElementById('countdown');
+setInterval(() => {
+    countdown--;
+    if (countdownEl) countdownEl.textContent = countdown;
+    if (countdown <= 0) window.location.reload();
+}, 1000);
+</script>
+}

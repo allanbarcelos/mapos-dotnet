@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")Portal do Cliente</title>
+    <link rel="shortcut icon" type="image/png" href="~/img/favicon.png" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="antialiased bg-gray-50">
+
+<div class="flex h-screen overflow-hidden" x-data="{ sidebarOpen: true }">
+
+    <!-- Sidebar -->
+    <aside :class="sidebarOpen ? 'w-60' : 'w-16 sidebar-collapsed'"
+           class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 overflow-hidden">
+
+        <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-200 h-16">
+            <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class='bx bx-user text-white text-lg'></i>
+            </div>
+            <span x-show="sidebarOpen" class="font-bold text-gray-900 text-lg truncate">Portal</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-0.5">
+            @{
+                var page = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+                string Active(string prefix) => page.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+            }
+            <a href="/Mine" class="sidebar-link @Active("/Mine/Index")">
+                <i class='bx bx-home-alt text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Painel</span>
+            </a>
+            <a href="/Mine/Os" class="sidebar-link @Active("/Mine/Os")">
+                <i class='bx bx-file text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Minhas OS</span>
+            </a>
+            <a href="/Mine/AdicionarOs" class="sidebar-link @Active("/Mine/AdicionarOs")">
+                <i class='bx bx-plus-circle text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Abrir OS</span>
+            </a>
+            <a href="/Mine/Compras" class="sidebar-link @Active("/Mine/Compras")">
+                <i class='bx bx-cart text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Compras</span>
+            </a>
+            <a href="/Mine/Cobrancas" class="sidebar-link @Active("/Mine/Cobrancas")">
+                <i class='bx bx-dollar-circle text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Cobranças</span>
+            </a>
+            <a href="/Mine/Conta" class="sidebar-link @Active("/Mine/Conta")">
+                <i class='bx bx-user-circle text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Minha Conta</span>
+            </a>
+        </nav>
+
+        <div class="border-t border-gray-200 px-2 py-3">
+            <a href="/Mine/Sair" class="sidebar-link text-red-500 hover:bg-red-50 hover:text-red-600">
+                <i class='bx bx-log-out text-xl flex-shrink-0'></i>
+                <span x-show="sidebarOpen">Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center px-6 gap-4 flex-shrink-0">
+            <button @@click="sidebarOpen = !sidebarOpen" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-menu text-xl'></i>
+            </button>
+            <span class="text-sm text-gray-500">Olá, <span class="font-medium text-gray-800">@User.Identity?.Name</span></span>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6">
+            @if (TempData["Success"] is string succ)
+            {
+                <div class="mb-4 flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+                    <i class='bx bx-check-circle text-base'></i> @succ
+                </div>
+            }
+            @if (TempData["Error"] is string err)
+            {
+                <div class="mb-4 flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+                    <i class='bx bx-error-circle text-base'></i> @err
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+</div>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

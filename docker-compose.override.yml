@@ -1,0 +1,49 @@
+# Overrides de desenvolvimento — mesclados automaticamente pelo `docker compose up`.
+#
+# Uso:
+#   cp .env.example .env          # preencha as senhas
+#   make setup                    # gera secrets/ a partir do .env
+#   make up
+
+secrets:
+  postgres_connection:
+    file: ./secrets/postgres_connection
+  postgres_password:
+    file: ./secrets/postgres_password
+  admin_password:
+    file: ./secrets/admin_password
+  smtp_host:
+    file: ./secrets/smtp_host
+  smtp_port:
+    file: ./secrets/smtp_port
+  smtp_ssl:
+    file: ./secrets/smtp_ssl
+  smtp_username:
+    file: ./secrets/smtp_username
+  smtp_password:
+    file: ./secrets/smtp_password
+  smtp_from:
+    file: ./secrets/smtp_from
+
+services:
+
+  app:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "8080:8080"   # acesso direto sem nginx para testes locais
+
+  db:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mapos}
+      POSTGRES_USER: ${POSTGRES_USER:-mapos_user}
+      # Senha vem do secret postgres_password (POSTGRES_PASSWORD_FILE)
+    ports:
+      - "5432:5432"   # expõe para ferramentas locais (DBeaver, psql)
+
+  nginx:
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    # Sem HTTPS em dev — volume letsencrypt não necessário

@@ -1,0 +1,112 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Vendas.ImprimirModel
+@{
+    ViewData["Title"] = $"Venda #{Model.Venda.Id}";
+    Layout = null;
+    var v    = Model.Venda;
+    var emit = Model.Emitente;
+    var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <title>Venda #@v.Id — @(ViewData["AppName"])</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; background: #fff; padding: 20px; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        h2 { font-size: 14px; margin: 14px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+        .doc-id { font-size: 22px; font-weight: bold; color: #333; }
+        dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+        dt { color: #666; font-size: 11px; text-transform: uppercase; }
+        dd { font-weight: 500; }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th, td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; font-size: 11px; }
+        th { background: #f5f5f5; font-weight: 600; }
+        .text-right { text-align: right; }
+        .total-row td { font-weight: bold; background: #f9f9f9; }
+        @@media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="no-print" style="margin-bottom:16px">
+    <button onclick="window.print()" style="padding:6px 16px;background:#2563eb;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px">
+        🖨 Imprimir
+    </button>
+    <a href="/Vendas/Visualizar/@v.Id" style="margin-left:8px;font-size:12px;color:#555">← Voltar</a>
+</div>
+
+<div class="header">
+    <div>
+        @if (emit is not null)
+        {
+            <h1>@emit.Nome</h1>
+            <p>@emit.Rua@(emit.Numero is not null ? $", {emit.Numero}" : "") — @(emit.Cidade ?? "")/@(emit.Uf ?? "")</p>
+            @if (emit.Telefone is not null) { <p>Tel: @emit.Telefone</p> }
+            @if (emit.Cnpj is not null) { <p>CNPJ: @emit.Cnpj</p> }
+        }
+        else { <h1>@ViewData["AppName"]</h1> }
+    </div>
+    <div style="text-align:right">
+        <p class="doc-id">Venda #@v.Id</p>
+        <p style="color:#666">@v.DataVenda.ToString("dd/MM/yyyy")</p>
+        <p style="font-weight:bold;font-size:13px">@v.Status</p>
+    </div>
+</div>
+
+<h2>Dados da Venda</h2>
+<dl>
+    <div><dt>Cliente</dt><dd>@v.Cliente.NomeCliente</dd></div>
+    <div><dt>Data</dt><dd>@v.DataVenda.ToString("dd/MM/yyyy")</dd></div>
+    @if (v.Cliente.Telefone is not null)
+    { <div><dt>Telefone</dt><dd>@v.Cliente.Telefone</dd></div> }
+    @if (v.Cliente.Documento is not null)
+    { <div><dt>CPF/CNPJ</dt><dd>@v.Cliente.Documento</dd></div> }
+</dl>
+
+<h2>Itens</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Produto</th>
+            <th class="text-right">Qtd</th>
+            <th class="text-right">Preço Unit.</th>
+            <th class="text-right">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in v.Itens)
+    {
+        <tr>
+            <td>@item.Produto.Descricao</td>
+            <td class="text-right">@item.Quantidade</td>
+            <td class="text-right">@item.Preco.ToString("C", ptBR)</td>
+            <td class="text-right">@item.SubTotal.ToString("C", ptBR)</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<table style="margin-top:10px;width:280px;margin-left:auto">
+    <tr><td>Subtotal</td><td class="text-right">@v.Itens.Sum(i => i.SubTotal).ToString("C", ptBR)</td></tr>
+    @if (v.ValorDesconto > 0)
+    { <tr><td>Desconto</td><td class="text-right">- @v.ValorDesconto.ToString("C", ptBR)</td></tr> }
+    <tr class="total-row"><td>TOTAL</td><td class="text-right">@v.ValorTotal.ToString("C", ptBR)</td></tr>
+</table>
+
+@if (!string.IsNullOrEmpty(v.Observacoes))
+{
+    <h2>Observações</h2>
+    <p>@v.Observacoes</p>
+}
+
+<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:12px;display:flex;justify-content:space-between">
+    <div style="width:45%;border-top:1px solid #333;padding-top:6px;text-align:center;font-size:11px;color:#555">Assinatura do Cliente</div>
+    <div style="width:45%;border-top:1px solid #333;padding-top:6px;text-align:center;font-size:11px;color:#555">Responsável</div>
+</div>
+
+</body>
+</html>

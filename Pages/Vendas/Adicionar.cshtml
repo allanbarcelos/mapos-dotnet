@@ -1,0 +1,74 @@
+@page
+@model mapos_dotnet.Pages.Vendas.AdicionarModel
+@{
+    ViewData["Title"] = "Nova Venda";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Vendas" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Nova Venda</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Preencha os dados da venda</p>
+    </div>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Input.ClienteId" class="form-label">Cliente <span class="text-red-500">*</span></label>
+                    <select asp-for="Input.ClienteId" class="form-select" required>
+                        <option value="">Selecione um cliente...</option>
+                        @foreach (var c in Model.Clientes)
+                        {
+                            <option value="@c.Id">@c.NomeCliente</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.ClienteId" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.DataVenda" class="form-label">Data da Venda <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.DataVenda" type="date" class="form-input" />
+                    <span asp-validation-for="Input.DataVenda" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Status" class="form-label">Status</label>
+                    <select asp-for="Input.Status" class="form-select">
+                        <option value="Aberto">Aberto</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                    <span asp-validation-for="Input.Status" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Observacoes" class="form-label">Observações (internas)</label>
+                    <textarea asp-for="Input.Observacoes" rows="3" class="form-input"
+                              placeholder="Observações internas sobre a venda..."></textarea>
+                    <span asp-validation-for="Input.Observacoes" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.ObservacoesCliente" class="form-label">Observações para o Cliente</label>
+                    <textarea asp-for="Input.ObservacoesCliente" rows="3" class="form-input"
+                              placeholder="Observações que serão exibidas ao cliente..."></textarea>
+                    <span asp-validation-for="Input.ObservacoesCliente" class="form-error"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-8">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-save mr-1'></i> Criar Venda
+                </button>
+                <a href="/Vendas" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

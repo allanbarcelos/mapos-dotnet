@@ -1,0 +1,54 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Categorias.EditarModel
+@{
+    ViewData["Title"] = "Editar Categoria";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Categorias" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Editar Categoria</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Altere os dados da categoria</p>
+    </div>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Input.Nome" class="form-label">Nome <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Nome" class="form-input" placeholder="Nome da categoria" />
+                    <span asp-validation-for="Input.Nome" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Tipo" class="form-label">Tipo</label>
+                    <select asp-for="Input.Tipo" class="form-input">
+                        <option value="">— Selecione —</option>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                        <option value="produto">Produto</option>
+                    </select>
+                    <span asp-validation-for="Input.Tipo" class="form-error"></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input asp-for="Input.Status" type="checkbox" class="w-4 h-4" />
+                    <label asp-for="Input.Status" class="form-label mb-0">Ativo</label>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-8">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-save mr-1'></i> Salvar Alterações
+                </button>
+                <a href="/Categorias" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

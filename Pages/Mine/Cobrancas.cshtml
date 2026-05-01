@@ -1,0 +1,65 @@
+@page
+@model mapos_dotnet.Pages.Mine.CobrancasModel
+@{
+    ViewData["Title"] = "Cobranças";
+}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Minhas Cobranças</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Boletos e cobranças geradas</p>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Criado em</th>
+                    <th>Vencimento</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Items.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-400">Nenhuma cobrança encontrada.</td>
+                    </tr>
+                }
+                @foreach (var c in Model.Items)
+                {
+                    var statusClass = c.Status switch
+                    {
+                        "RECEIVED" or "CONFIRMED" => "badge-green",
+                        "CANCELLED" or "OVERDUE"  => "badge-red",
+                        _                          => "badge-yellow"
+                    };
+                    <tr>
+                        <td class="text-gray-500">#@c.Id</td>
+                        <td class="text-xs text-gray-500">@c.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                        <td class="text-xs text-gray-500">@c.ExpireAt.ToString("dd/MM/yyyy")</td>
+                        <td class="text-sm font-medium">@(c.Total.HasValue ? c.Total.Value.ToString("N2") : "—")</td>
+                        <td><span class="@statusClass text-xs">@(c.Status ?? "—")</span></td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(c.Pdf))
+                            {
+                                <a href="@c.Pdf" target="_blank" class="btn-secondary btn-sm">
+                                    <i class='bx bx-download mr-1'></i> Boleto
+                                </a>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(c.PaymentUrl))
+                            {
+                                <a href="@c.PaymentUrl" target="_blank" class="btn-secondary btn-sm">
+                                    <i class='bx bx-link-external mr-1'></i> Pagar
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

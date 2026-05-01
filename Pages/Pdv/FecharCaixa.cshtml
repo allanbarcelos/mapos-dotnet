@@ -1,0 +1,103 @@
+@page "/Pdv/FecharCaixa/{id:int}"
+@model mapos_dotnet.Pages.Pdv.FecharCaixaModel
+@{ ViewData["Title"] = "Fechar Caixa"; }
+
+<div class="max-w-2xl mx-auto">
+
+    <div class="flex items-center gap-4 mb-6">
+        <a href="/Pdv" class="btn-secondary"><i class='bx bx-arrow-back'></i></a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Fechar Caixa #@Model.Sessao.Id</h1>
+            <p class="text-sm text-gray-500">Operador: @Model.Sessao.Operador.Nome — Aberto em @Model.Sessao.AbertoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+
+    <!-- Resumo das vendas -->
+    <div class="card mb-6">
+        <div class="card-header"><h3 class="font-semibold">Resumo da Sessão</h3></div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Vendas realizadas</p>
+                    <p class="text-2xl font-bold text-gray-900">@Model.QtdVendas</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Total vendido</p>
+                    <p class="text-2xl font-bold text-green-700">R$ @Model.TotalVendas.ToString("F2")</p>
+                </div>
+            </div>
+            <table class="w-full text-sm">
+                <tbody class="divide-y divide-gray-100">
+                    <tr class="py-2">
+                        <td class="py-2 text-gray-600">Dinheiro</td>
+                        <td class="py-2 text-right font-medium">R$ @Model.TotalDinheiro.ToString("F2")</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-gray-600">PIX</td>
+                        <td class="py-2 text-right font-medium">R$ @Model.TotalPix.ToString("F2")</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-gray-600">Débito</td>
+                        <td class="py-2 text-right font-medium">R$ @Model.TotalDebito.ToString("F2")</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-gray-600">Crédito</td>
+                        <td class="py-2 text-right font-medium">R$ @Model.TotalCredito.ToString("F2")</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-gray-600">Fiado</td>
+                        <td class="py-2 text-right font-medium">R$ @Model.TotalFiado.ToString("F2")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Conferência de caixa -->
+    <div class="card mb-6">
+        <div class="card-header"><h3 class="font-semibold">Conferência de Caixa (Dinheiro)</h3></div>
+        <div class="card-body">
+            <div class="grid grid-cols-2 gap-4 text-sm mb-5">
+                <div>
+                    <p class="text-gray-500">Saldo inicial</p>
+                    <p class="font-semibold text-gray-900">R$ @Model.Sessao.SaldoInicial.ToString("F2")</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Entradas em dinheiro</p>
+                    <p class="font-semibold text-gray-900">R$ @Model.TotalDinheiro.ToString("F2")</p>
+                </div>
+                <div class="col-span-2 bg-blue-50 rounded-lg p-3">
+                    <p class="text-xs text-blue-600">Saldo esperado em caixa</p>
+                    <p class="text-xl font-bold text-blue-800">R$ @Model.Sessao.SaldoEsperado.ToString("F2")</p>
+                </div>
+            </div>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="Input.SaldoInformado" class="form-label">
+                            Dinheiro contado em caixa <span class="text-red-500">*</span>
+                        </label>
+                        <input asp-for="Input.SaldoInformado" type="number" step="0.01" min="0"
+                               class="form-input text-2xl font-bold text-center" placeholder="0,00" autofocus />
+                        <span asp-validation-for="Input.SaldoInformado" class="form-error"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Input.Observacoes" class="form-label">Observações</label>
+                        <input asp-for="Input.Observacoes" class="form-input"
+                               placeholder="Observações opcionais sobre o fechamento" />
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <a href="/Pdv" class="btn-secondary">Cancelar</a>
+                    <button type="submit"
+                            onclick="return confirm('Confirmar fechamento do caixa? Esta ação não pode ser desfeita.')"
+                            class="btn-danger flex-1 justify-center">
+                        <i class='bx bx-door-open mr-2'></i> Fechar Caixa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

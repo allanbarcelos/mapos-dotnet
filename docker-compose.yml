@@ -1,0 +1,119 @@
+# Arquivo de produção.
+# Valores sensíveis são lidos de Docker secrets (./secrets/<nome>).
+# Para desenvolvimento, use docker-compose.override.yml.
+#
+# Arquivos esperados em ./secrets/:
+#   postgres_connection  — connection string Npgsql completa
+#   postgres_password    — apenas a senha (usado no init do Postgres)
+#   admin_password       — senha do usuário admin criado no seed inicial
+#
+# Início rápido (prod):
+#   mkdir secrets && chmod 700 secrets
+#   echo -n "Host=db;Port=5432;Database=mapos;Username=mapos_user;Password=SENHA" > secrets/postgres_connection
+#   echo -n "SENHA"              > secrets/postgres_password
+#   echo -n "SENHA_DO_ADMIN"     > secrets/admin_password
+#   chmod 600 secrets/*
+#   docker compose up -d
+
+secrets:
+  postgres_connection:
+    file: ./secrets/postgres_connection
+  postgres_password:
+    file: ./secrets/postgres_password
+  admin_password:
+    file: ./secrets/admin_password
+  smtp_host:
+    file: ./secrets/smtp_host
+  smtp_port:
+    file: ./secrets/smtp_port
+  smtp_ssl:
+    file: ./secrets/smtp_ssl
+  smtp_username:
+    file: ./secrets/smtp_username
+  smtp_password:
+    file: ./secrets/smtp_password
+  smtp_from:
+    file: ./secrets/smtp_from
+  mp_access_token:
+    file: ./secrets/mp_access_token
+  mp_boleto_expiration:
+    file: ./secrets/mp_boleto_expiration
+
+services:
+
+  # ── Aplicação .NET ────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    secrets:
+      - postgres_connection
+      - admin_password
+      - smtp_host
+      - smtp_port
+      - smtp_ssl
+      - smtp_username
+      - smtp_password
+      - smtp_from
+      - mp_access_token
+      - mp_boleto_expiration
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mapos
+      POSTGRES_USER: mapos_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mapos_user -d mapos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Nginx (proxy reverso) ─────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - internal_network
+
+volumes:
+  pgdata:
+  letsencrypt:
+
+networks:
+  internal_network:
+    driver: bridge

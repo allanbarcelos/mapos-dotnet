@@ -1,0 +1,45 @@
+@page
+@model mapos_dotnet.Pages.Mine.AdicionarOsModel
+@{
+    ViewData["Title"] = "Abrir OS";
+}
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Mine/Os" class="text-gray-400 hover:text-gray-600">
+        <i class='bx bx-arrow-back text-xl'></i>
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Abrir Nova OS</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Descreva o problema ou solicitação de serviço</p>
+    </div>
+</div>
+
+<div class="card max-w-2xl">
+    <div class="card-body">
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Input.DescricaoProduto" class="form-label">Descrição do Produto / Equipamento</label>
+                    <input asp-for="Input.DescricaoProduto" class="form-input"
+                           placeholder="Ex: Notebook Dell Inspiron 15, celular Samsung Galaxy S21..." />
+                </div>
+
+                <div>
+                    <label asp-for="Input.Defeito" class="form-label">Defeito / Solicitação <span class="text-red-500">*</span></label>
+                    <textarea asp-for="Input.Defeito" rows="5" class="form-input"
+                              placeholder="Descreva detalhadamente o problema ou o serviço que precisa ser realizado..."></textarea>
+                    <span asp-validation-for="Input.Defeito" class="form-error"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-8">
+                <button type="submit" class="btn-primary">
+                    <i class='bx bx-send mr-1'></i> Enviar Solicitação
+                </button>
+                <a href="/Mine/Os" class="btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

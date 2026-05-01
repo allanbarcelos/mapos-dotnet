@@ -1,0 +1,147 @@
+@page
+@model mapos_dotnet.Pages.Vendas.IndexModel
+@{
+    ViewData["Title"] = "Vendas";
+    var baseUrl = "/Vendas?q=" + Uri.EscapeDataString(Model.Q ?? "")
+        + "&status=" + Uri.EscapeDataString(Model.FiltroStatus ?? "")
+        + "&de=" + (Model.FiltroDe?.ToString("yyyy-MM-dd") ?? "")
+        + "&ate=" + (Model.FiltroAte?.ToString("yyyy-MM-dd") ?? "");
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Vendas</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Gerencie as vendas realizadas</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Vendas/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova Venda
+        </a>
+    }
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-48">
+                <label class="form-label">Buscar</label>
+                <input type="search" name="q" value="@Model.Q" placeholder="Cliente..."
+                       class="form-input" />
+            </div>
+            <div class="min-w-40">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="Aberto" selected="@(Model.FiltroStatus == "Aberto")">Aberto</option>
+                    <option value="Concluído" selected="@(Model.FiltroStatus == "Concluído")">Concluído</option>
+                    <option value="Cancelado" selected="@(Model.FiltroStatus == "Cancelado")">Cancelado</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">De</label>
+                <input type="date" name="de" value="@Model.FiltroDe?.ToString("yyyy-MM-dd")" class="form-input" />
+            </div>
+            <div>
+                <label class="form-label">Até</label>
+                <input type="date" name="ate" value="@Model.FiltroAte?.ToString("yyyy-MM-dd")" class="form-input" />
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class='bx bx-search'></i> Filtrar
+            </button>
+            @if (!string.IsNullOrEmpty(Model.Q) || !string.IsNullOrEmpty(Model.FiltroStatus) || Model.FiltroDe.HasValue || Model.FiltroAte.HasValue)
+            {
+                <a href="/Vendas" class="btn-secondary">
+                    <i class='bx bx-x'></i> Limpar
+                </a>
+            }
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Vendas.Any())
+        {
+            <div class="py-16 text-center text-gray-400">
+                <i class='bx bx-cart-alt text-5xl mb-3 block'></i>
+                <p class="text-lg font-medium">Nenhuma venda encontrada</p>
+                <p class="text-sm mt-1">Tente ajustar os filtros ou cadastre uma nova venda.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table-mapos">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Data</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Faturado</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var venda in Model.Vendas)
+                    {
+                        <tr>
+                            <td class="text-gray-400 text-sm">@venda.Id</td>
+                            <td class="font-medium">@venda.Cliente.NomeCliente</td>
+                            <td class="text-gray-600">@venda.DataVenda.ToString("dd/MM/yyyy")</td>
+                            <td class="font-medium">@venda.ValorDesconto.ToString("C")</td>
+                            <td>
+                                @{
+                                    var badgeStatus = venda.Status switch
+                                    {
+                                        "Concluído" => "badge-green",
+                                        "Cancelado" => "badge-red",
+                                        _ => "badge-yellow"
+                                    };
+                                }
+                                <span class="badge @badgeStatus">@venda.Status</span>
+                            </td>
+                            <td>
+                                @if (venda.Faturado)
+                                {
+                                    <span class="badge badge-blue">Sim</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-gray">Não</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/Vendas/Visualizar/@venda.Id" class="btn-secondary btn-sm">
+                                        <i class='bx bx-show mr-1'></i> Ver
+                                    </a>
+                                    <a href="/Vendas/Editar/@venda.Id" class="btn-secondary btn-sm">
+                                        <i class='bx bx-edit mr-1'></i> Editar
+                                    </a>
+                                    @if (!venda.Faturado && Model.PodeExcluir)
+                                    {
+                                        <form method="post" asp-page-handler="Excluir" asp-route-id="@venda.Id"
+                                              onsubmit="return confirm('Deseja realmente excluir a venda #@venda.Id?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-danger btn-sm">
+                                                <i class='bx bx-trash mr-1'></i> Excluir
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="px-4 py-3 border-t border-gray-100">
+                @await Html.PartialAsync("_Pagination", (Model.CurrentPage, Model.TotalPages, baseUrl))
+            </div>
+        }
+    </div>
+</div>

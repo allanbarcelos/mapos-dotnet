@@ -1,0 +1,47 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.ServicosModel
+@{ ViewData["Title"] = "Relatório de Serviços"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório de Serviços</h1>
+    <a href="?handler=Exportar&q=@Model.Q" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex gap-3">
+            <input type="search" name="q" value="@Model.Q" class="form-input max-w-sm" placeholder="Nome do serviço..." />
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr><th>#</th><th>Nome</th><th>Descrição</th><th class="text-right">Preço</th><th class="text-right">Usos em OS</th><th class="text-right">Total Faturado</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model.Items)
+            {
+                <tr>
+                    <td class="text-gray-400 text-xs">@row.Servico.Id</td>
+                    <td class="font-medium text-sm">@row.Servico.Nome</td>
+                    <td class="text-xs text-gray-500">@(row.Servico.Descricao ?? "-")</td>
+                    <td class="text-right text-sm">@row.Servico.Preco.ToString("C", ptBR)</td>
+                    <td class="text-right text-sm">@row.Usos</td>
+                    <td class="text-right text-sm font-medium">@row.TotalFaturado.ToString("C", ptBR)</td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="6" class="text-center py-8 text-gray-400">Nenhum resultado</td></tr> }
+            </tbody>
+            <tfoot>
+                <tr class="font-semibold bg-gray-50">
+                    <td colspan="5" class="text-right text-sm">Total (@Model.Items.Count)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.TotalFaturado).ToString("C", ptBR)</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

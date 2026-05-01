@@ -1,0 +1,182 @@
+@page
+@model mapos_dotnet.Pages.Configuracoes.IndexModel
+@{ ViewData["Title"] = "Configurações"; }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Configurações do Sistema</h1>
+</div>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Geral -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Geral</h3></div>
+            <div class="card-body space-y-4">
+                <div>
+                    <label asp-for="AppName" class="form-label">Nome do Sistema</label>
+                    <input asp-for="AppName" class="form-input" />
+                </div>
+                <div>
+                    <label asp-for="AppTheme" class="form-label">Tema</label>
+                    <select asp-for="AppTheme" class="form-select">
+                        <option value="white">Branco (padrão)</option>
+                        <option value="puredark">Escuro</option>
+                        <option value="darkviolet">Escuro Violeta</option>
+                        <option value="darkorange">Escuro Laranja</option>
+                        <option value="whitegreen">Branco Verde</option>
+                        <option value="whiteblack">Branco Preto</option>
+                    </select>
+                </div>
+                <div>
+                    <label asp-for="PerPage" class="form-label">Itens por Página</label>
+                    <input asp-for="PerPage" type="number" min="5" max="100" class="form-input" />
+                </div>
+                <div>
+                    <label asp-for="PixKey" class="form-label">Chave PIX</label>
+                    <input asp-for="PixKey" class="form-input" placeholder="CPF, CNPJ, email, telefone ou chave aleatória" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Ordens de Serviço -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Ordens de Serviço</h3></div>
+            <div class="card-body space-y-4">
+                <div>
+                    <label asp-for="OsNotification" class="form-label">Notificação de Status</label>
+                    <select asp-for="OsNotification" class="form-select">
+                        <option value="cliente">Somente cliente</option>
+                        <option value="todos">Todos</option>
+                        <option value="nenhum">Nenhum</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Status Disponíveis (JSON array)</label>
+                    <textarea asp-for="OsStatusList" rows="4" class="form-input font-mono text-xs"
+                              placeholder='["Aberto","Em Andamento","Finalizado"]'></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- E-mail -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">E-mail</h3></div>
+            <div class="card-body space-y-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="EmailAutomatico" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">E-mail Automático</p><p class="text-xs text-gray-500">Envia e-mail ao cliente quando o status da OS mudar</p></div>
+                </label>
+                <div class="grid grid-cols-2 gap-4 pt-1">
+                    <div>
+                        <label asp-for="EmailProcessInterval" class="form-label">Intervalo de envio (min)</label>
+                        <input asp-for="EmailProcessInterval" type="number" min="1" max="60" class="form-input" />
+                        <p class="text-xs text-gray-400 mt-1">Padrão: 2 min</p>
+                    </div>
+                    <div>
+                        <label asp-for="EmailRetryInterval" class="form-label">Intervalo de reenvio (min)</label>
+                        <input asp-for="EmailRetryInterval" type="number" min="1" max="60" class="form-input" />
+                        <p class="text-xs text-gray-400 mt-1">Padrão: 5 min</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="card">
+            <div class="card-header"><h3 class="font-semibold">Controles</h3></div>
+            <div class="card-body space-y-3">
+
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="ControlEstoque" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">Controle de Estoque</p><p class="text-xs text-gray-500">Debita estoque ao adicionar produto em OS/Venda</p></div>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="ControlEditos" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">Editar OS após Faturamento</p><p class="text-xs text-gray-500">Permite edição mesmo depois de faturar</p></div>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="ControlEditVendas" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">Editar Vendas após Faturamento</p></div>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="ControlBaixa" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">Baixa Retroativa</p><p class="text-xs text-gray-500">Permite informar data de pagamento anterior à atual</p></div>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input asp-for="Control2Vias" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                    <div><p class="text-sm font-medium">Impressão em 2 Vias</p></div>
+                </label>
+            </div>
+        </div>
+
+        <!-- PDV / Impressora Térmica -->
+        <div class="card lg:col-span-2">
+            <div class="card-header"><h3 class="font-semibold">PDV — Impressora Térmica</h3></div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label asp-for="PdvPrinterHost" class="form-label">Host da Impressora (IP ou hostname)</label>
+                        <input asp-for="PdvPrinterHost" class="form-input" placeholder="192.168.1.100" />
+                        <p class="text-xs text-gray-400 mt-1">Deixe em branco para desabilitar impressão via socket</p>
+                    </div>
+                    <div>
+                        <label asp-for="PdvPrinterPort" class="form-label">Porta TCP</label>
+                        <input asp-for="PdvPrinterPort" type="number" class="form-input" placeholder="9100" />
+                        <p class="text-xs text-gray-400 mt-1">Padrão: 9100 (RAW printing)</p>
+                    </div>
+                    <div>
+                        <label asp-for="PdvPaperCols" class="form-label">Largura do Papel</label>
+                        <select asp-for="PdvPaperCols" class="form-input">
+                            <option value="32">58 mm (32 colunas)</option>
+                            <option value="48">80 mm (48 colunas)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="flex items-start gap-3 cursor-pointer mt-6">
+                            <input asp-for="PdvGerarLancamento" type="checkbox" class="mt-0.5 h-4 w-4 text-primary-600 rounded" />
+                            <div>
+                                <p class="text-sm font-medium">Gerar Lançamento Financeiro</p>
+                                <p class="text-xs text-gray-500">Cria receita no financeiro ao finalizar venda PDV</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div>
+                        <label asp-for="PdvReceiptHeader" class="form-label">Cabeçalho do Cupom</label>
+                        <textarea asp-for="PdvReceiptHeader" rows="4" class="form-input font-mono text-xs"
+                                  placeholder="Nome da Loja&#10;Endereço, Nº — Cidade/UF&#10;Tel: (00) 00000-0000"></textarea>
+                        <p class="text-xs text-gray-400 mt-1">Cada linha = uma linha no cupom. Texto centralizado em negrito.</p>
+                    </div>
+                    <div>
+                        <label asp-for="PdvReceiptFooter" class="form-label">Rodapé do Cupom</label>
+                        <textarea asp-for="PdvReceiptFooter" rows="4" class="form-input font-mono text-xs"
+                                  placeholder="Obrigado pela preferência!&#10;Volte sempre!"></textarea>
+                        <p class="text-xs text-gray-400 mt-1">Texto exibido após os totais. Texto centralizado.</p>
+                    </div>
+                    <div class="col-span-full border-t border-gray-100 pt-4">
+                        <p class="text-sm font-semibold text-gray-700 mb-3">MercadoPago Point (maquininha)</p>
+                        <p class="text-xs text-gray-400 mb-3">Configure para enviar cobranças de PIX, Débito e Crédito diretamente à maquininha durante o PDV.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label asp-for="PdvMpAccessToken" class="form-label">Access Token</label>
+                                <input asp-for="PdvMpAccessToken" class="form-input font-mono text-xs"
+                                       placeholder="APP_USR-..." autocomplete="off" />
+                                <p class="text-xs text-gray-400 mt-1">Token de produção ou sandbox do MercadoPago</p>
+                            </div>
+                            <div>
+                                <label asp-for="PdvMpDeviceId" class="form-label">ID do Dispositivo Point</label>
+                                <input asp-for="PdvMpDeviceId" class="form-input font-mono text-xs"
+                                       placeholder="PAX_A910__SMARTPOS123456" />
+                                <p class="text-xs text-gray-400 mt-1">Device ID da maquininha — obtido via API ou painel MP</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit" class="btn-primary"><i class='bx bx-save'></i> Salvar Configurações</button>
+    </div>
+</form>

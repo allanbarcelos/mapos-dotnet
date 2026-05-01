@@ -1,0 +1,38 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Financeiro.EditarModel
+@{ ViewData["Title"] = "Editar Lançamento"; }
+
+<div class="flex items-center gap-3 mb-6">
+    <a href="/Financeiro/Lancamentos" class="text-gray-400 hover:text-gray-600"><i class='bx bx-arrow-back text-xl'></i></a>
+    <h1 class="text-2xl font-bold text-gray-900">Editar Lançamento</h1>
+</div>
+<div class="card max-w-2xl card-body">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Input.Id" type="hidden" />
+        <input asp-for="Input.Tipo" type="hidden" />
+        <div class="space-y-4">
+            <div><label asp-for="Input.Descricao" class="form-label">Descrição</label><input asp-for="Input.Descricao" class="form-input" /></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label asp-for="Input.Valor" class="form-label">Valor</label><input asp-for="Input.Valor" type="number" step="0.01" class="form-input" /></div>
+                <div><label asp-for="Input.DataVencimento" class="form-label">Vencimento</label><input asp-for="Input.DataVencimento" type="date" class="form-input" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label asp-for="Input.Desconto" class="form-label">Desconto</label><input asp-for="Input.Desconto" type="number" step="0.01" class="form-input" /></div>
+                <div><label asp-for="Input.TipoDesconto" class="form-label">Tipo</label><select asp-for="Input.TipoDesconto" class="form-select"><option value="real">Valor</option><option value="percent">%</option></select></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label asp-for="Input.DataPagamento" class="form-label">Data Pagamento</label><input asp-for="Input.DataPagamento" type="date" class="form-input" /></div>
+                <div class="flex items-center gap-2 mt-5"><input asp-for="Input.Baixado" type="checkbox" class="h-4 w-4" /><label asp-for="Input.Baixado" class="text-sm">Baixado (Pago)</label></div>
+            </div>
+            <div><label asp-for="Input.ClienteId" class="form-label">Cliente/Fornecedor</label><select asp-for="Input.ClienteId" class="form-select"><option value="">Nenhum</option>@foreach(var c in Model.Clientes){<option value="@c.Id">@c.NomeCliente</option>}</select></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label asp-for="Input.CategoriaId" class="form-label">Categoria</label><select asp-for="Input.CategoriaId" class="form-select"><option value="">Nenhuma</option>@foreach(var c in Model.Categorias){<option value="@c.Id">@c.Nome</option>}</select></div>
+                <div><label asp-for="Input.ContaId" class="form-label">Conta</label><select asp-for="Input.ContaId" class="form-select"><option value="">Nenhuma</option>@foreach(var c in Model.Contas){<option value="@c.Id">@c.Nome</option>}</select></div>
+            </div>
+            <div><label asp-for="Input.FormaPgto" class="form-label">Forma de Pagamento</label><input asp-for="Input.FormaPgto" class="form-input" /></div>
+            <div><label asp-for="Input.Observacoes" class="form-label">Observações</label><textarea asp-for="Input.Observacoes" rows="3" class="form-input"></textarea></div>
+        </div>
+        <div class="flex gap-3 mt-6"><button type="submit" class="btn-primary"><i class='bx bx-save'></i> Salvar</button><a href="/Financeiro/Lancamentos" class="btn-secondary">Cancelar</a></div>
+    </form>
+</div>

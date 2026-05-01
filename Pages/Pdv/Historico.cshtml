@@ -1,0 +1,101 @@
+@page
+@model mapos_dotnet.Pages.Pdv.HistoricoModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Histórico de Caixa";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Histórico de Caixa</h1>
+    <a href="/Pdv" class="btn-secondary"><i class='bx bx-store mr-2'></i>Frente de Caixa</a>
+</div>
+
+@if (Model.Sessoes.Count == 0)
+{
+    <div class="card">
+        <div class="card-body text-center text-gray-400 py-12">
+            <i class='bx bx-history text-5xl mb-2'></i>
+            <p>Nenhuma sessão encontrada.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Abertura</th>
+                        <th>Fechamento</th>
+                        <th>Operador</th>
+                        <th class="text-right">Saldo Inicial</th>
+                        <th class="text-right">Total Vendas</th>
+                        <th class="text-right">Saldo Esperado</th>
+                        <th class="text-right">Diferença</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Sessoes)
+                    {
+                        var total = s.Vendas.Sum(v => v.ValorTotal);
+                        var dif = s.Diferenca ?? 0;
+                        var difClass = dif < 0 ? "text-red-600" : dif > 0 ? "text-yellow-600" : "text-green-600";
+                        <tr>
+                            <td class="font-mono text-xs">@s.Id</td>
+                            <td class="text-sm">@s.AbertoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-sm">
+                                @if (s.FechadoEm.HasValue)
+                                {
+                                    @s.FechadoEm.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">—</span>
+                                }
+                            </td>
+                            <td>@s.Operador.Nome</td>
+                            <td class="text-right">R$ @s.SaldoInicial.ToString("F2")</td>
+                            <td class="text-right font-medium text-green-700">R$ @total.ToString("F2")</td>
+                            <td class="text-right text-blue-700">R$ @s.SaldoEsperado.ToString("F2")</td>
+                            <td class="text-right font-medium @difClass">
+                                @if (s.Status == "fechada")
+                                {
+                                    @($"R$ {Math.Abs(dif):F2}")
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (s.Status == "aberta")
+                                {
+                                    <span class="badge badge-success">Aberta</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">Fechada</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="/Pdv/Sessao/@s.Id" class="btn-xs btn-secondary">
+                                    <i class='bx bx-show'></i>
+                                </a>
+                                @if (s.Status == "aberta")
+                                {
+                                    <a href="/Pdv/FecharCaixa/@s.Id" class="btn-xs btn-danger ml-1">
+                                        <i class='bx bx-door-open'></i>
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

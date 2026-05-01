@@ -1,0 +1,105 @@
+@page
+@model mapos_dotnet.Pages.Account.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Map-OS</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-md">
+    <div class="card p-8">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Map-OS</h1>
+            <p class="text-sm text-gray-500 mt-1">Sistema de Gestão de Ordens de Serviço</p>
+        </div>
+
+        <!-- Error -->
+        @if (Model.ErrorMessage is not null)
+        {
+            <div class="alert-error mb-6">
+                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span>@Model.ErrorMessage</span>
+            </div>
+        }
+
+        <!-- Form -->
+        <form method="post" x-data="{ area: 'admin' }">
+            <div class="space-y-5">
+
+                <!-- Seletor de área -->
+                <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                    <button type="button"
+                            @@click="area = 'admin'"
+                            :class="area === 'admin'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'"
+                            class="flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all">
+                        <i class='bx bx-cog text-base'></i>
+                        Administrativo
+                    </button>
+                    <button type="button"
+                            @@click="area = 'pdv'"
+                            :class="area === 'pdv'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'"
+                            class="flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all">
+                        <i class='bx bx-store text-base'></i>
+                        PDV
+                    </button>
+                </div>
+                <input type="hidden" name="Input.Destino" :value="area" />
+
+                <div>
+                    <label asp-for="Input.Email" class="form-label">E-mail</label>
+                    <input asp-for="Input.Email" type="email" class="form-input"
+                           placeholder="seu@email.com" autocomplete="email" />
+                    <span asp-validation-for="Input.Email" class="form-error"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Senha" class="form-label">Senha</label>
+                    <input asp-for="Input.Senha" type="password" class="form-input"
+                           placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Input.Senha" class="form-error"></span>
+                </div>
+
+                <div class="flex items-center">
+                    <input asp-for="Input.LembrarMe" type="checkbox"
+                           class="h-4 w-4 text-primary-600 border-gray-300 rounded" />
+                    <label asp-for="Input.LembrarMe" class="ml-2 text-sm text-gray-700">Lembrar-me</label>
+                </div>
+            </div>
+
+            <button type="submit"
+                    :class="area === 'pdv' ? 'bg-green-600 hover:bg-green-700' : ''"
+                    class="btn-primary w-full justify-center mt-6 py-2.5">
+                <i :class="area === 'pdv' ? 'bx bx-store' : 'bx bx-log-in'" class="mr-1"></i>
+                <span x-text="area === 'pdv' ? 'Entrar no PDV' : 'Entrar'"></span>
+            </button>
+        </form>
+    </div>
+
+    <p class="text-center text-xs text-gray-400 mt-6">Map-OS &copy; @DateTime.Now.Year</p>
+</div>
+
+</body>
+</html>

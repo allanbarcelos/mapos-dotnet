@@ -1,0 +1,66 @@
+@page
+@model mapos_dotnet.Pages.Relatorios.ProdutosModel
+@{ ViewData["Title"] = "Relatório de Produtos"; var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR"); }
+
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Relatório de Produtos</h1>
+    <a href="?handler=Exportar&q=@Model.Q&baixo=@Model.ApenasEstoqueBaixo" class="btn-secondary btn-sm"><i class='bx bx-file'></i> Exportar Excel</a>
+</div>
+
+<div class="card mb-4 print:hidden">
+    <div class="card-body">
+        <form method="get" class="flex flex-wrap gap-3 items-end">
+            <div class="flex-1 min-w-40">
+                <label class="form-label">Buscar</label>
+                <input type="search" name="q" value="@Model.Q" class="form-input" placeholder="Descrição ou código..." />
+            </div>
+            <div class="flex items-center gap-2 pb-1">
+                <input type="checkbox" id="baixo" name="baixo" value="true" @(Model.ApenasEstoqueBaixo ? "checked" : "")
+                       class="w-4 h-4 rounded border-gray-300 text-primary-600" />
+                <label for="baixo" class="text-sm">Somente estoque baixo</label>
+            </div>
+            <button type="submit" class="btn-primary">Filtrar</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th><th>Descrição</th><th>Categoria</th>
+                    <th class="text-right">Compra</th><th class="text-right">Venda</th>
+                    <th class="text-right">Estoque</th><th class="text-right">Uso OS</th>
+                    <th class="text-right">Uso Vendas</th><th class="text-right">Total Faturado</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model.Items)
+            {
+                var baixo = row.Produto.Estoque <= row.Produto.EstoqueMinimo;
+                <tr>
+                    <td class="text-gray-400 text-xs">@row.Produto.Id</td>
+                    <td class="font-medium text-sm">
+                        <a href="/Produtos/Visualizar/@row.Produto.Id" class="hover:underline text-primary-600 print:text-black">@row.Produto.Descricao</a>
+                    </td>
+                    <td class="text-xs text-gray-500">@(row.Produto.Categoria?.Nome ?? "-")</td>
+                    <td class="text-right text-sm">@row.Produto.PrecoCompra.ToString("C", ptBR)</td>
+                    <td class="text-right text-sm">@row.Produto.PrecoVenda.ToString("C", ptBR)</td>
+                    <td class="text-right text-sm @(baixo ? "text-red-600 font-bold" : "")">@row.Produto.Estoque</td>
+                    <td class="text-right text-sm">@row.UsadoOs</td>
+                    <td class="text-right text-sm">@row.UsadoVendas</td>
+                    <td class="text-right text-sm font-medium">@row.TotalVendido.ToString("C", ptBR)</td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="9" class="text-center py-8 text-gray-400">Nenhum resultado</td></tr> }
+            </tbody>
+            <tfoot>
+                <tr class="font-semibold bg-gray-50">
+                    <td colspan="8" class="text-right text-sm">Total (@Model.Items.Count)</td>
+                    <td class="text-right">@Model.Items.Sum(r => r.TotalVendido).ToString("C", ptBR)</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@page
+@model mapos_dotnet.Pages.Categorias.IndexModel
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Categorias</h1>
+        <p class="text-sm text-gray-500 mt-0.5">Categorias de produtos e lançamentos</p>
+    </div>
+    @if (Model.PodeAdicionar)
+    {
+        <a href="/Categorias/Adicionar" class="btn-primary">
+            <i class='bx bx-plus mr-1'></i> Nova Categoria
+        </a>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table-mapos">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Categorias.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-gray-400">Nenhuma categoria cadastrada.</td>
+                    </tr>
+                }
+                @foreach (var cat in Model.Categorias)
+                {
+                    <tr>
+                        <td class="text-gray-500">@cat.Id</td>
+                        <td class="font-medium">@cat.Nome</td>
+                        <td class="text-gray-600">@(cat.Tipo ?? "—")</td>
+                        <td>
+                            @if (cat.Status)
+                            {
+                                <span class="badge-green text-xs">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge-red text-xs">Inativo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <a href="/Categorias/Editar/@cat.Id" class="btn-secondary btn-sm">
+                                    <i class='bx bx-edit-alt mr-1'></i> Editar
+                                </a>
+                                <form method="post" asp-page-handler="Excluir" asp-route-id="@cat.Id"
+                                      onsubmit="return confirm('Deseja realmente excluir a categoria \'@cat.Nome\'?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-danger btn-sm">
+                                        <i class='bx bx-trash mr-1'></i> Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

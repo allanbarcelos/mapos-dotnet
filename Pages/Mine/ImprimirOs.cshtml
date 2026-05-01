@@ -1,0 +1,173 @@
+@page "{id:int}"
+@model mapos_dotnet.Pages.Mine.ImprimirOsModel
+@{
+    Layout = null;
+    var os   = Model.Os;
+    var emit = Model.Emitente;
+    var ptBR = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OS #@os.Id</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; background: #fff; padding: 20px; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        h2 { font-size: 14px; margin: 14px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+        .header-left p { margin: 2px 0; }
+        .os-id { font-size: 22px; font-weight: bold; color: #333; }
+        dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+        dt { color: #666; font-size: 11px; text-transform: uppercase; }
+        dd { font-weight: 500; }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th, td { border: 1px solid #ddd; padding: 5px 8px; text-align: left; font-size: 11px; }
+        th { background: #f5f5f5; font-weight: 600; }
+        .text-right { text-align: right; }
+        .total-row td { font-weight: bold; background: #f9f9f9; }
+        .footer { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 12px; display: flex; justify-content: space-between; }
+        .assinatura { width: 45%; border-top: 1px solid #333; padding-top: 6px; text-align: center; font-size: 11px; color: #555; }
+        @@media print {
+            body { padding: 10px; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print" style="margin-bottom:16px">
+    <button onclick="window.print()" style="padding:6px 16px;background:#2563eb;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px">
+        🖨 Imprimir
+    </button>
+    <a href="/Mine/VisualizarOs/@os.Id" style="margin-left:8px;font-size:12px;color:#555">← Voltar</a>
+</div>
+
+<div class="header">
+    <div class="header-left">
+        @if (emit is not null)
+        {
+            <h1>@emit.Nome</h1>
+            <p>@emit.Rua@(emit.Numero is not null ? $", {emit.Numero}" : "") — @(emit.Bairro ?? "") — @(emit.Cidade ?? "")/@(emit.Uf ?? "")</p>
+            @if (emit.Telefone is not null) { <p>Tel: @emit.Telefone</p> }
+            @if (emit.Email is not null) { <p>@emit.Email</p> }
+            @if (emit.Cnpj is not null) { <p>CNPJ: @emit.Cnpj</p> }
+        }
+    </div>
+    <div style="text-align:right">
+        <p class="os-id">OS #@os.Id</p>
+        <p style="color:#666">@(os.DataInicial?.ToString("dd/MM/yyyy") ?? "—")</p>
+        <p style="margin-top:4px;font-size:13px;font-weight:bold">@os.Status</p>
+    </div>
+</div>
+
+<h2>Dados da Ordem de Serviço</h2>
+<dl>
+    <div><dt>Cliente</dt><dd>@os.Cliente.NomeCliente</dd></div>
+    <div><dt>Técnico</dt><dd>@os.Usuario.Nome</dd></div>
+    <div><dt>Data Inicial</dt><dd>@(os.DataInicial?.ToString("dd/MM/yyyy") ?? "—")</dd></div>
+    <div><dt>Previsão Entrega</dt><dd>@(os.DataFinal?.ToString("dd/MM/yyyy") ?? "—")</dd></div>
+    @if (os.Cliente.Telefone is not null)
+    { <div><dt>Telefone</dt><dd>@os.Cliente.Telefone</dd></div> }
+    @if (os.Garantia is not null)
+    { <div><dt>Garantia</dt><dd>@os.Garantia</dd></div> }
+</dl>
+
+@if (!string.IsNullOrEmpty(os.DescricaoProduto))
+{
+    <h2>Descrição do Equipamento</h2>
+    <p>@os.DescricaoProduto</p>
+}
+
+@if (!string.IsNullOrEmpty(os.Defeito))
+{
+    <h2>Defeito Relatado</h2>
+    <p>@os.Defeito</p>
+}
+
+@if (os.EquipamentosOs.Any())
+{
+    <h2>Equipamentos</h2>
+    <table>
+        <thead><tr><th>Equipamento</th><th>Nº Série</th><th>Defeito</th><th>Solução</th></tr></thead>
+        <tbody>
+        @foreach (var eq in os.EquipamentosOs)
+        {
+            <tr>
+                <td>@(eq.Equipamento?.Nome ?? "-")</td>
+                <td>@(eq.Equipamento?.NumSerie ?? "-")</td>
+                <td>@(eq.DefeitoDeclarado ?? "-")</td>
+                <td>@(eq.Solucao ?? "-")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if (os.ProdutosOs.Any())
+{
+    <h2>Produtos</h2>
+    <table>
+        <thead><tr><th>Descrição</th><th class="text-right">Qtd</th><th class="text-right">Preço</th><th class="text-right">Subtotal</th></tr></thead>
+        <tbody>
+        @foreach (var p in os.ProdutosOs)
+        {
+            <tr>
+                <td>@p.Descricao</td>
+                <td class="text-right">@p.Quantidade</td>
+                <td class="text-right">@p.Preco.ToString("C", ptBR)</td>
+                <td class="text-right">@p.SubTotal.ToString("C", ptBR)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if (os.ServicosOs.Any())
+{
+    <h2>Serviços</h2>
+    <table>
+        <thead><tr><th>Serviço</th><th class="text-right">Qtd</th><th class="text-right">Preço</th><th class="text-right">Subtotal</th></tr></thead>
+        <tbody>
+        @foreach (var s in os.ServicosOs)
+        {
+            <tr>
+                <td>@s.Servico</td>
+                <td class="text-right">@s.Quantidade</td>
+                <td class="text-right">@s.Preco.ToString("C", ptBR)</td>
+                <td class="text-right">@s.SubTotal.ToString("C", ptBR)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<table style="margin-top:12px;width:300px;margin-left:auto">
+    @if (os.ValorDesconto > 0)
+    {
+        <tr><td>Desconto</td><td class="text-right">- @os.ValorDesconto.ToString("C", ptBR)</td></tr>
+    }
+    <tr class="total-row"><td>TOTAL</td><td class="text-right">@os.ValorTotal.ToString("C", ptBR)</td></tr>
+</table>
+
+@if (!string.IsNullOrEmpty(os.LaudoTecnico))
+{
+    <h2>Laudo Técnico</h2>
+    <p>@os.LaudoTecnico</p>
+}
+
+@if (!string.IsNullOrEmpty(os.Observacoes))
+{
+    <h2>Observações</h2>
+    <p>@os.Observacoes</p>
+}
+
+<div class="footer">
+    <div class="assinatura">Assinatura do Técnico</div>
+    <div class="assinatura">Assinatura do Cliente</div>
+</div>
+
+</body>
+</html>
