@@ -14,6 +14,20 @@ on:
   push:
     branches: [main]
     tags: ["v*.*.*"]
+    # Executa apenas quando arquivos que afetam o build são alterados.
+    # Mudanças em .md, docs/, nginx.conf, install.sh, etc. não disparam novo build.
+    # Obs.: filtros de path são ignorados em pushes de tag — tags sempre executam.
+    paths:
+      - "**/*.cs"
+      - "**/*.cshtml"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "appsettings*.json"
+      - "wwwroot/**"
+      - "Dockerfile"
+      - "package*.json"
+      - "tailwind.config.js"
+      - ".github/workflows/docker-publish.yml"
   workflow_dispatch:
 
 permissions:
