@@ -1,0 +1,78 @@
+name: Publish install/uninstall to Gist
+
+# Atualiza netpos-install.sh e/ou netpos-uninstall.sh no mesmo Gist.
+# O Gist ID fica em: Settings → Variables (vars.GIST_ID) — não é secret.
+# O token de acesso fica em: Settings → Secrets (secrets.GIST_TOKEN).
+#
+# URL dos arquivos publicados:
+#   https://gist.githubusercontent.com/allanbarcelos/<GIST_ID>/raw/netpos-install.sh
+#   https://gist.githubusercontent.com/allanbarcelos/<GIST_ID>/raw/netpos-uninstall.sh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - install.sh
+      - uninstall.sh
+
+jobs:
+  publish-gist:
+    name: Update Gist
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # precisa do commit anterior para o diff
+
+      - name: Detect changed files
+        id: changes
+        run: |
+          git diff --name-only HEAD~1 HEAD > changed.txt
+          echo "install=$(grep -qx 'install.sh' changed.txt     && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "uninstall=$(grep -qx 'uninstall.sh' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Build PATCH payload and publish to Gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ vars.GIST_ID }}
+          INSTALL_CHANGED: ${{ steps.changes.outputs.install }}
+          UNINSTALL_CHANGED: ${{ steps.changes.outputs.uninstall }}
+        run: |
+          # Monta o objeto "files" com apenas os arquivos alterados
+          FILES='{}'
+
+          if [[ "$INSTALL_CHANGED" == "true" ]]; then
+            CONTENT=$(jq -Rs . < install.sh)
+            FILES=$(echo "$FILES" | jq --argjson c "$CONTENT" \
+              '.["netpos-install.sh"] = {content: $c}')
+            echo "→ netpos-install.sh incluído no payload"
+          fi
+
+          if [[ "$UNINSTALL_CHANGED" == "true" ]]; then
+            CONTENT=$(jq -Rs . < uninstall.sh)
+            FILES=$(echo "$FILES" | jq --argjson c "$CONTENT" \
+              '.["netpos-uninstall.sh"] = {content: $c}')
+            echo "→ netpos-uninstall.sh incluído no payload"
+          fi
+
+          PAYLOAD=$(jq -n --argjson f "$FILES" '{files: $f}')
+
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X PATCH \
+            -H "Authorization: token ${GIST_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/gists/${GIST_ID}" \
+            -d "$PAYLOAD")
+
+          if [[ "$HTTP_STATUS" != "200" ]]; then
+            echo "Erro: API retornou HTTP ${HTTP_STATUS}"
+            cat response.json
+            exit 1
+          fi
+
+          echo "Gist atualizado com sucesso (HTTP ${HTTP_STATUS})"
+          echo "URL: https://gist.github.com/allanbarcelos/${GIST_ID}"
