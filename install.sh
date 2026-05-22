@@ -78,7 +78,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH
 readonly APP_NAME="netpos"
 readonly APP_DIR="/opt/netpos"
 readonly STACK_NAME="netpos"
-readonly APP_IMAGE="ghcr.io/allanbarcelos/netpos:latest"
+readonly APP_IMAGE="ghcr.io/allanbarcelos/mapos-dotnet:latest"
 
 # ── Cores ──────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YLW='\033[1;33m'
@@ -142,11 +142,12 @@ detect_os() {
 swarm_secret_exists() { docker secret inspect "$1" &>/dev/null; }
 
 create_swarm_secret() {
-  local name="$1" value="$2"
+  local name="$1" value="${2:-}"
   if swarm_secret_exists "$name"; then
     warn "Secret '${name}' já existe — ignorando"
   else
-    printf '%s' "$value" | docker secret create "$name" - >/dev/null
+    # docker secret create não aceita STDIN vazio; usa placeholder para opcionais
+    printf '%s' "${value:- }" | docker secret create "$name" - >/dev/null
     ok "Secret criado: ${name}"
   fi
 }
