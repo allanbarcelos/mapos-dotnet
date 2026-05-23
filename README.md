@@ -1,8 +1,10 @@
-# Map-OS .NET
+# NetPOS
 
 Sistema de gestão empresarial para pequenas e médias empresas — ordens de serviço, vendas, financeiro e PDV profissional.
 
-> **Inspirado no [Map-OS](https://github.com/RamonSilva20/mapos)**, projeto open source original criado por **[Ramon Silva](https://github.com/RamonSilva20)** e mantido pela comunidade, escrito em PHP/CodeIgniter 3.
+> **Sobre o nome:** este projeto nasceu como uma reimplementação do **[Map-OS](https://github.com/RamonSilva20/mapos)** em ASP.NET Core e por muito tempo viveu sob essa identidade. Com o crescimento das funcionalidades próprias, da arquitetura independente e da base de usuários em produção, ficou claro que o projeto merecia um nome que refletisse sua própria trajetória — daí o **NetPOS**. A referência ao Map-OS não desaparece: ela está na origem, na inspiração e no respeito ao trabalho que tornou este projeto possível.
+>
+> Créditos ao **[Map-OS](https://github.com/RamonSilva20/mapos)**, criado por **[Ramon Silva](https://github.com/RamonSilva20)** e mantido pela comunidade open source. A concepção original do sistema, a modelagem de negócio e a filosofia do produto pertencem ao projeto original e seus contribuidores.
 >
 > Esta é uma **reimplementação totalmente remodelada em ASP.NET Core 9 (.NET)** — não uma portagem linha a linha. A arquitetura, a modelagem de dados, o sistema de permissões, o PDV e diversas funcionalidades foram redesenhados do zero com features próprias que não existem na versão original.
 
@@ -44,7 +46,7 @@ O sistema suporta operação via **tablets Android em modo kiosk** conectados ao
 
 ## O que diferencia esta versão
 
-| Aspecto | Map-OS PHP original | Esta versão (.NET) |
+| Aspecto | Map-OS PHP original | NetPOS (.NET) |
 |---------|--------------------|--------------------|
 | Runtime | PHP 8 / CodeIgniter 3 | ASP.NET Core 9 |
 | Banco | MySQL | PostgreSQL 16 |
@@ -208,7 +210,7 @@ make up
 Acesse **http://localhost**
 
 Login padrão criado no primeiro boot:
-- **E-mail:** `admin@mail.com`
+- **E-mail:** valor definido em `ADMIN_EMAIL` no `.env` (padrão: `admin@netpos.local`)
 - **Senha:** valor definido em `ADMIN_PASSWORD` no `.env`
 
 ---
@@ -224,10 +226,11 @@ npm run build:css
 
 # 3. Configure a connection string
 # appsettings.Development.json ou variável de ambiente:
-export ConnectionStrings__DefaultConnection="Host=localhost;Database=mapos;Username=postgres;Password=postgres"
+export ConnectionStrings__DefaultConnection="Host=localhost;Database=netpos;Username=postgres;Password=postgres"
 
-# 4. Configure a senha do admin (primeiro boot)
-export MAPOS_ADMIN_PASSWORD="sua_senha"
+# 4. Configure as credenciais do admin (primeiro boot)
+export NETPOS_ADMIN_EMAIL="admin@netpos.local"
+export NETPOS_ADMIN_PASSWORD="sua_senha"
 
 # 5. Execute (migrations rodam automaticamente)
 dotnet run
@@ -240,7 +243,8 @@ dotnet run
 | Variável | Descrição |
 |----------|-----------|
 | `ConnectionStrings__DefaultConnection` | Connection string Npgsql completa |
-| `MAPOS_ADMIN_PASSWORD` | Senha do usuário admin criado no seed inicial |
+| `NETPOS_ADMIN_EMAIL` | E-mail do usuário admin criado no seed inicial |
+| `NETPOS_ADMIN_PASSWORD` | Senha do usuário admin criado no seed inicial |
 | `ASPNETCORE_ENVIRONMENT` | `Development` ou `Production` |
 
 Em produção com Docker, os valores sensíveis são lidos de **Docker secrets** pelo `entrypoint.sh` — nunca de variáveis de ambiente em texto puro.
@@ -253,6 +257,7 @@ Em produção com Docker, os valores sensíveis são lidos de **Docker secrets**
 |---------|----------|
 | `secrets/postgres_connection` | Connection string completa |
 | `secrets/postgres_password` | Senha do PostgreSQL |
+| `secrets/admin_email` | E-mail do usuário admin |
 | `secrets/admin_password` | Senha do usuário admin |
 | `secrets/smtp_host` | Servidor SMTP |
 | `secrets/smtp_port` | Porta SMTP |
@@ -362,11 +367,11 @@ mapos-dotnet/
 
 ## Créditos
 
-Este projeto é inspirado no **[Map-OS](https://github.com/RamonSilva20/mapos)**, criado por **[Ramon Silva](https://github.com/RamonSilva20)** e mantido pela comunidade open source. O crédito pela concepção original do sistema, modelagem de negócio e filosofia do produto pertence ao projeto original e seus contribuidores.
+Este projeto nasceu como uma reimplementação do **[Map-OS](https://github.com/RamonSilva20/mapos)**, criado por **[Ramon Silva](https://github.com/RamonSilva20)** e mantido pela comunidade open source. O crédito pela concepção original do sistema, a modelagem de negócio e a filosofia do produto pertencem ao projeto original e seus contribuidores — e essa referência não vai a lugar nenhum.
 
-Esta implementação é independente, remodelada integralmente em ASP.NET Core com arquitetura, banco de dados e funcionalidades próprias.
+O NetPOS é independente, remodelado integralmente em ASP.NET Core com arquitetura, banco de dados e funcionalidades próprias, mas carrega com orgulho a inspiração de onde veio.
 
-- Repositório original: https://github.com/RamonSilva20/mapos
+- Repositório original (Map-OS): https://github.com/RamonSilva20/mapos
 - Licença original: MIT
 
 ---

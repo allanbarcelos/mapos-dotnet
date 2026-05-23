@@ -85,7 +85,7 @@ using (var scope = app.Services.CreateScope())
     if (!db.Configuracoes.Any())
     {
         db.Configuracoes.AddRange(
-            new() { Config = "app_name",          Valor = "Map-OS" },
+            new() { Config = "app_name",          Valor = "NetPOS" },
             new() { Config = "app_theme",          Valor = "white" },
             new() { Config = "per_page",           Valor = "10" },
             new() { Config = "os_notification",    Valor = "cliente" },
@@ -146,17 +146,19 @@ using (var scope = app.Services.CreateScope())
     // Seed usuário admin padrão
     if (!db.Usuarios.Any())
     {
-        var adminPassword = Environment.GetEnvironmentVariable("MAPOS_ADMIN_PASSWORD");
+        var adminEmail    = Environment.GetEnvironmentVariable("NETPOS_ADMIN_EMAIL");
+        var adminPassword = Environment.GetEnvironmentVariable("NETPOS_ADMIN_PASSWORD");
+
         if (string.IsNullOrWhiteSpace(adminPassword))
             throw new InvalidOperationException(
-                "Variável de ambiente MAPOS_ADMIN_PASSWORD não definida. " +
+                "Variável de ambiente NETPOS_ADMIN_PASSWORD não definida. " +
                 "Em Docker, configure o secret 'admin_password'. " +
                 "Localmente, exporte a variável antes de executar.");
 
         db.Usuarios.Add(new()
         {
             Nome = "Administrador",
-            Email = "admin@mail.com",
+            Email = string.IsNullOrWhiteSpace(adminEmail) ? "admin@netpos.local" : adminEmail,
             Senha = BCrypt.Net.BCrypt.HashPassword(adminPassword),
             Situacao = true,
             PermissaoId = 1,

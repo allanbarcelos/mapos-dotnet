@@ -12,8 +12,9 @@ load_secret() {
 # ConnectionStrings:DefaultConnection (notação __ = hierarquia de config)
 load_secret postgres_connection "ConnectionStrings__DefaultConnection"
 
-# Senha do admin para o seed inicial
-load_secret admin_password "MAPOS_ADMIN_PASSWORD"
+# Credenciais do admin para o seed inicial
+load_secret admin_email    "NETPOS_ADMIN_EMAIL"
+load_secret admin_password "NETPOS_ADMIN_PASSWORD"
 
 # Configurações SMTP para envio da fila de e-mails
 load_secret smtp_host     "Smtp__Host"
