@@ -94,7 +94,7 @@ if docker stack ls 2>/dev/null | grep -q "^${STACK_NAME}"; then
 
   # Aguarda containers pararem completamente antes de remover secrets
   info "Aguardando containers pararem..."
-  local _wait=0
+  _wait=0
   until ! docker ps --filter "name=${STACK_NAME}_" --quiet 2>/dev/null | grep -q .; do
     sleep 2
     _wait=$((_wait + 2))
