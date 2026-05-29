@@ -743,6 +743,12 @@ ok "Stack file: ${STACK_FILE}"
 # ==============================================================================
 phase "FASE 9 — Deploy do stack"
 
+info "Verificando containerd..."
+if ! systemctl is-active --quiet containerd; then
+  systemctl restart containerd
+  sleep 3
+fi
+
 info "Baixando imagem ${APP_IMAGE} ..."
 docker pull "$APP_IMAGE"
 
